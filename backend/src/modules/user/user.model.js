@@ -16,7 +16,7 @@ password:{
         },
 role:{
         type: String,
-        enum: ['student', 'recruiter', 'admin'],
+        enum: ['student','employee', 'recruiter', 'admin'],
         default: 'student'
     },
         
