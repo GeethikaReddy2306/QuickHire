@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt=require('jsonwebtoken');
 const User = require("../models/user.model");
-
 async function registerUser(req,res){
         const{name,email,phoneNumber,password,role}=req.body;
         try{
@@ -132,4 +131,4 @@ async function updateProfile(req, res) {
         });
     }
 }
-        module.exports=updateProfile,registerUser,login;
+        module.exports={updateProfile,registerUser,login};
