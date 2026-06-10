@@ -10,7 +10,7 @@ const jobSchema=new mongoose.Schema({
                 type:String
         }],salary:{
                 type:Number,
-                default:"As per compay bases"
+                default:"As per comapay bases"
         },location:{
                 type:String,
                 required:true

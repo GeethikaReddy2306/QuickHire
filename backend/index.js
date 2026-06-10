@@ -1,7 +1,7 @@
 const express=require('express');
 const app=express();
 const cookieParser=require('cookie-parser');
-
+const companyRoutes = require('./routes/company.routes');
 const dotenv=require('dotenv');
 
 app.use(express.json());
@@ -20,6 +20,7 @@ db().then((res)=>{console.log("db connected")})
 
 const router=require('./routes/user.routes');
 app.use('/api/user', router);
+app.use('api/company',companyRoutes);
 /*const coresOptions={
         origin:'http://localhost:5173',
         credentials:true

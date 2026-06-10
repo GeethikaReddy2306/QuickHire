@@ -2,7 +2,8 @@
 const applicationSchema=new mongoose.Schema({
         companyName:{
                 type:String,
-                required:true
+                required:true,
+                unique:true
         },description:{
                 type:String,
                 required:true
