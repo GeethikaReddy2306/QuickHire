@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-async function isAuthorized(req, res, next) {
+async function isAuthenticated(req, res, next) {
     try {
         const token = req.cookies.token;
 
@@ -33,4 +33,4 @@ async function isAuthorized(req, res, next) {
     }
 }
 
-module.exports = isAuthorized;
+module.exports = isAuthenticated;

@@ -21,7 +21,11 @@ const jobSchema=new mongoose.Schema({
         },position:{
                 type:String,
                 required:true
-        },company:{
+        },experienceLevel:{
+                type:String,
+                required:true,
+        },
+        company:{
                 type:mongoose.Schema.Types.ObjectId,
                 ref:'Company',
                 requires:true

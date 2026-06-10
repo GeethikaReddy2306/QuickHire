@@ -1,9 +1,9 @@
 const {getCompany,registerCompany,updateCompany,getCompanyId}=require('../controllers/company.controller');
 const express=require('express');
 const router=express.Router();
-const isAuthorized=require('../middleware/auth');
-router.post('/register',isAuthorized,registerCompany);
-router.get('/get',isAuthorized,getCompany);
-router.get('/get/:id',isAuthorized,getCompanyId);
-router.patch('/update/:id',isAuthorized,updateCompany);
+const isAuthenticated=require('../middleware/auth');
+router.post('/register',isAuthenticated,registerCompany);
+router.get('/get',isAuthenticated,getCompany);
+router.get('/get/:id',isAuthenticated,getCompanyId);
+router.patch('/update/:id',isAuthenticated,updateCompany);
 module.exports=router;

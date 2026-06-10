@@ -1,0 +1,10 @@
+const{ postJob,getAdminJob,getJobId,getAllJobs}=require('../models/job.model');
+const express=require('express');
+const router=express.Router();
+const isAuthenticated=require('../middleware/auth');
+const { route } = require('./company.routes');
+route.post('/post',isAuthenticated,postJob);
+route.get('/get',isAuthenticated,getAllJobs);
+route.post('/getadminJobs',isAuthenticated,getAdminJob);
+route.post('/get/:id',isAuthenticated,getJobId);
+module.exports=router;
