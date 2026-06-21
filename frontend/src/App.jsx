@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import HomePage from "./Pages/HomePage";
 import JobsPage from "./Pages/JobsPage";
 import BrowsePage from "./Pages/BrowsePage";
+
 import Footer from "./components/Footer";
 export default function App() {
   return (

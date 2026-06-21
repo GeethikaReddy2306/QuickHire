@@ -1,0 +1,199 @@
+#browse-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8f8f5;
+  padding: 60px;
+}
+
+/* Header */
+.browse-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.browse-header h1 {
+  font-size: 2.7rem;
+  color: #222;
+  margin-bottom: 14px;
+  line-height: 1.2;
+}
+
+.browse-header p {
+  font-size: 1.05rem;
+  color: #666;
+  max-width: 780px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* Sections */
+.browse-section {
+  margin-bottom: 70px;
+}
+
+.section-heading {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.section-heading h2 {
+  font-size: 2rem;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.section-heading p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Grid cards */
+.browse-grid {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.browse-card,
+.company-box,
+.path-card {
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.browse-card:hover,
+.company-box:hover,
+.path-card:hover {
+  transform: translateY(-6px);
+}
+
+/* Category cards */
+.browse-card {
+  width: 320px;
+  padding: 28px;
+}
+
+.browse-card h3 {
+  font-size: 1.35rem;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.browse-card p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.browse-card span {
+  display: inline-block;
+  background-color: #eef3ea;
+  color: #4b5a44;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+/* Company cards */
+.companies-grid {
+  align-items: stretch;
+}
+
+.company-box {
+  width: 260px;
+  padding: 28px;
+  text-align: center;
+}
+
+.company-box h3 {
+  font-size: 1.5rem;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.company-box p {
+  color: #666;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.company-box button,
+.path-card button {
+  border: none;
+  background-color: #7f8f78;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Career path cards */
+.career-paths {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.path-card {
+  width: 350px;
+  padding: 30px;
+  text-align: left;
+}
+
+.path-card h3 {
+  font-size: 1.45rem;
+  color: #222;
+  margin-bottom: 14px;
+}
+
+.path-card p {
+  color: #666;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+  #browse-page {
+    padding: 45px 30px;
+  }
+
+  .browse-header h1 {
+    font-size: 2.2rem;
+  }
+
+  .section-heading h2 {
+    font-size: 1.8rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  #browse-page {
+    padding: 35px 20px;
+  }
+
+  .browse-header h1 {
+    font-size: 1.9rem;
+  }
+
+  .browse-header p {
+    font-size: 0.95rem;
+  }
+
+  .section-heading h2 {
+    font-size: 1.6rem;
+  }
+
+  .browse-card,
+  .company-box,
+  .path-card {
+    width: 100%;
+    max-width: 360px;
+  }
+}
