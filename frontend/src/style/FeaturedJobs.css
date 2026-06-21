@@ -1,0 +1,136 @@
+#featured-jobs {
+  width: 100%;
+  background-color: #f8f8f5;
+  padding: 70px 60px;
+}
+
+.featured-heading {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.featured-heading h2 {
+  font-size: 2.4rem;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.featured-heading p {
+  font-size: 1.05rem;
+  color: #666;
+}
+
+.jobs-container {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.job-card {
+  width: 330px;
+  background-color: white;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-6px);
+}
+
+.company-name {
+  color: #7f8f78;
+  font-weight: 700;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.job-card h3 {
+  font-size: 1.6rem;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.job-location {
+  color: #666;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+}
+
+.job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.job-tags span {
+  background-color: #eef3ea;
+  color: #4b5a44;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.salary {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 20px;
+}
+
+.job-card button {
+  width: 100%;
+  border: none;
+  background-color: #7f8f78;
+  color: white;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.featured-btn {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.featured-btn button {
+  border: none;
+  background-color: #7f8f78;
+  color: white;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+  #featured-jobs {
+    padding: 55px 30px;
+  }
+
+  .featured-heading h2 {
+    font-size: 2rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  #featured-jobs {
+    padding: 45px 20px;
+  }
+
+  .featured-heading h2 {
+    font-size: 1.8rem;
+  }
+
+  .job-card {
+    width: 100%;
+    max-width: 350px;
+  }
+}

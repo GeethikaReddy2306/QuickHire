@@ -1,0 +1,122 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#navbar {
+  background-color: #7f8f78;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 60px;
+  position: relative;
+}
+
+.logo h1 {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.logo span {
+  color: #b8c7a7;
+}
+
+/* Desktop Menu */
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.menu ul {
+  list-style: none;
+  display: flex;
+  gap: 35px;
+}
+
+.menu ul li a {
+  text-decoration: none;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+}
+
+#login,
+#signup {
+  height: 42px;
+  width: 100px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+}
+
+#login {
+  background-color: white;
+  color: #7f8f78;
+}
+
+#signup {
+  background-color: #b8c7a7;
+  color: black;
+  font-weight: 600;
+}
+
+/* Hamburger hidden on desktop */
+.hamburger {
+  display: none;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+}
+
+/* Tablet / Mobile */
+@media (max-width: 768px) {
+  #navbar {
+    padding: 18px 25px;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #7f8f78;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 25px 0;
+  }
+
+  .menu.active {
+    display: flex;
+  }
+
+  .menu ul {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  #login,
+  #signup {
+    width: 140px;
+  }
+}
