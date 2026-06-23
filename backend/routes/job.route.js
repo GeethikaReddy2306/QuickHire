@@ -12,7 +12,7 @@ const isAuthenticated = require('../middleware/auth');
 
 router.post('/post', isAuthenticated, postJob);
 router.get('/get', isAuthenticated, getAllJobs);
-router.get('/getadminJobs', isAuthenticated, getAdminJob);
+router.get('/admin', isAuthenticated, getAdminJob);
 router.get('/get/:id', isAuthenticated, getJobId);
 
 module.exports = router;

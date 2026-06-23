@@ -75,7 +75,15 @@ const alreadylogin= await User.findOne({email});
 })
 .json({
     message: "Login successful",
-    success: true
+    success: true,
+    user: {
+        _id: alreadylogin._id,
+        name: alreadylogin.name,
+        email: alreadylogin.email,
+        phoneNumber: alreadylogin.phoneNumber,
+        role: alreadylogin.role,
+        profile: alreadylogin.profile
+    }
 });
 
         }catch(err){
@@ -97,7 +105,10 @@ async function updateProfile(req, res) {
             });
         }
 
-        const skillsArray = skills.split(",");
+       const skillsArray = skills
+  .split(",")
+  .map((skill) => skill.trim())
+  .filter((skill) => skill !== "");
 
         const userId = req.id;
 

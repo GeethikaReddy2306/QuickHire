@@ -17,7 +17,7 @@ const userSchema=new mongoose.Schema({
                 required:true
         },role:{
                 type:String,
-                enum:['student','employee','recruiter'],
+                enum:['student','recruiter'],
                 default:'employee'
         },profile:{bio:{
                 type:String,

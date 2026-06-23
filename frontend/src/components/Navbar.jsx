@@ -1,9 +1,12 @@
 import "../style/Navbar.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <nav id="navbar">
@@ -29,8 +32,38 @@ export default function Navbar() {
         </ul>
 
         <div className="buttons">
-          <button id="login">Login</button>
-          <button id="signup">SignUp</button>
+          {!isAuthenticated ? (
+            <>
+              <Link to="/login">
+                <button id="login" onClick={() => setMenuOpen(false)}>Login</button>
+              </Link>
+
+              <Link to="/signup">
+                <button id="signup" onClick={() => setMenuOpen(false)}>Sign Up</button>
+              </Link>
+            </>
+          ) : (
+            <div className="profile-box">
+  <Link
+    to="/profile"
+    className="profile-name"
+    onClick={() => setMenuOpen(false)}
+  >
+    Hi, {user?.name}
+  </Link>
+
+  <button
+    id="logout"
+    onClick={() => {
+      logout();
+      setMenuOpen(false);
+      navigate("/login");
+    }}
+  >
+    Logout
+  </button>
+</div>
+          )}
         </div>
       </div>
 
