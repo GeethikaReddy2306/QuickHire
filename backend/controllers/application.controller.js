@@ -34,6 +34,13 @@ async function applyJob(req, res) {
             });
         }
 
+        if (job.status === "closed") {
+            return res.status(400).json({
+                message: "This job is closed. Applications are no longer accepted.",
+                success: false
+            });
+        }
+
         const newApplication = await Application.create({
             job: jobId,
             applicant: userId
@@ -55,6 +62,7 @@ async function applyJob(req, res) {
         });
     }
 }
+
 async function getAppliedJob(req, res) {
     try {
         const userId = req.id;
@@ -62,13 +70,13 @@ async function getAppliedJob(req, res) {
         const application = await Application.find({
             applicant: userId
         })
-        .sort({ createdAt: -1 })
-        .populate({
-            path: "job",
-            populate: {
-                path: "company"
-            }
-        });
+            .sort({ createdAt: -1 })
+            .populate({
+                path: "job",
+                populate: {
+                    path: "company"
+                }
+            });
 
         if (application.length === 0) {
             return res.status(404).json({
@@ -89,23 +97,25 @@ async function getAppliedJob(req, res) {
             success: false
         });
     }
-};
-//admin checks how many applied
+}
+
+// recruiter/admin checks applicants for a specific job
 async function getApplicants(req, res) {
     try {
         const jobId = req.params.id;
 
-        const job = await Job.findById(jobId).populate({
-            path: "applications",
-            options: {
-                sort: {
-                    createdAt: -1
+        const job = await Job.findById(jobId)
+            .populate("company")
+            .populate({
+                path: "applications",
+                options: {
+                    sort: { createdAt: -1 }
+                },
+                populate: {
+                    path: "applicant",
+                    select: "name email phoneNumber role profile"
                 }
-            },
-            populate: {
-                path: "applicant"
-            }
-        });
+            });
 
         if (!job) {
             return res.status(404).json({
@@ -159,7 +169,6 @@ async function updateStatus(req, res) {
         }
 
         application.status = status.toLowerCase();
-
         await application.save();
 
         return res.status(200).json({
@@ -175,4 +184,5 @@ async function updateStatus(req, res) {
         });
     }
 }
-module.exports = { applyJob,getAppliedJob, updateStatus,getApplicants};
+
+module.exports = { applyJob, getAppliedJob, updateStatus, getApplicants };

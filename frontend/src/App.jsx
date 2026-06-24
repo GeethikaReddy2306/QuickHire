@@ -9,9 +9,12 @@ import Footer from "./components/Footer";
 import ProfilePage from "./Pages/ProfilePage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import RecruiterDashboard from "./Pages/RecruiterDashboard";
-import CreateCompanyPage from "./Pages/CreateCompanyPage";
-import CreateJobPage from "./Pages/CreateJobPage";
+import RecruiterDashboard from "./Pages/RecruiterDashboard";import CreateJobPage from "./Pages/CreateJobPage";
+import RecruiterJobsPage from "./Pages/RecruiterJobsPage";
+import RecruiterApplicantsPage from "./Pages/RecruiterApplicantsPage";
+import RecruiterCompaniesPage from "./Pages/RecruiterCompaniesPage";
+import RecruiterCreateCompanyPage from "./Pages/RecruiterCreateCompanyPage";
+import RecruiterEditCompanyPage from "./Pages/RecruiterEditCompanyPage";
 export default function App() {
   return (
     <div>
@@ -25,9 +28,13 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/recruiter/dashboard" element={<RecruiterDashboard/>}/>
-        <Route path="/recruiter/company/create" element={<CreateCompanyPage />} />
         <Route path="/recruiter/job/create" element={<CreateJobPage />} />
-      </Routes>
+        <Route path="/recruiter/jobs" element={<RecruiterJobsPage />} />
+        <Route path="/recruiter/jobs/:jobId/applicants" element={<RecruiterApplicantsPage />}/>
+        <Route path="/recruiter/companies" element={<RecruiterCompaniesPage />} />
+        <Route path="/recruiter/company/create" element={<RecruiterCreateCompanyPage />} />
+        <Route path="/recruiter/company/edit/:id" element={<RecruiterEditCompanyPage />} />
+</Routes>
 
       <ToastContainer />
       <Footer />

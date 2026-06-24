@@ -3,29 +3,33 @@ const Company = require("../models/company.model");
 // Register Company
 async function registerCompany(req, res) {
   try {
-    const { name, description, website, location } = req.body;
+    const { companyName, description, website, location, logo } = req.body;
 
-    if (!name || !description || !website || !location) {
+    if (!companyName) {
       return res.status(400).json({
-        message: "All company fields are required",
+        message: "Company name is required",
         success: false
       });
     }
 
-    let company = await Company.findOne({ name });
+    const existingCompany = await Company.findOne({
+      companyName,
+      userId: req.id
+    });
 
-    if (company) {
+    if (existingCompany) {
       return res.status(400).json({
-        message: "Company already exists",
+        message: "You already registered this company",
         success: false
       });
     }
 
-    company = await Company.create({
-      name,
-      description,
-      website,
-      location,
+    const company = await Company.create({
+      companyName,
+      description: description || "",
+      website: website || "",
+      location: location || "",
+      logo: logo || "",
       userId: req.id
     });
 
@@ -43,12 +47,12 @@ async function registerCompany(req, res) {
   }
 }
 
-// Get all companies of logged in recruiter
+// Get all companies of logged-in recruiter
 async function getCompany(req, res) {
   try {
-    const userId = req.id;
-
-    const companies = await Company.find({ userId });
+    const companies = await Company.find({ userId: req.id }).sort({
+      createdAt: -1
+    });
 
     return res.status(200).json({
       companies,
@@ -63,12 +67,13 @@ async function getCompany(req, res) {
   }
 }
 
-// Get company by id
+// Get single company by id
 async function getCompanyId(req, res) {
   try {
-    const companyId = req.params.id;
-
-    const company = await Company.findById(companyId);
+    const company = await Company.findOne({
+      _id: req.params.id,
+      userId: req.id
+    });
 
     if (!company) {
       return res.status(404).json({
@@ -93,26 +98,28 @@ async function getCompanyId(req, res) {
 // Update company
 async function updateCompany(req, res) {
   try {
-    const { name, description, website, location } = req.body;
-    const id = req.params.id;
+    const { companyName, description, website, location, logo } = req.body;
+    const companyId = req.params.id;
 
-    const updateData = {
-      name,
-      description,
-      website,
-      location
-    };
-
-    const company = await Company.findByIdAndUpdate(id, updateData, {
-      new: true
+    const company = await Company.findOne({
+      _id: companyId,
+      userId: req.id
     });
 
     if (!company) {
       return res.status(404).json({
-        message: "Company not found",
+        message: "Company not found or unauthorized",
         success: false
       });
     }
+
+    if (companyName !== undefined) company.companyName = companyName;
+    if (description !== undefined) company.description = description;
+    if (website !== undefined) company.website = website;
+    if (location !== undefined) company.location = location;
+    if (logo !== undefined) company.logo = logo;
+
+    await company.save();
 
     return res.status(200).json({
       message: "Company updated successfully",

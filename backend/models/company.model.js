@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const companySchema = new mongoose.Schema(
   {
-    name: {
+    companyName: {
       type: String,
       required: true,
-      unique: true
+      trim: true
     },
     description: {
       type: String,
@@ -25,12 +25,16 @@ const companySchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true
     }
   },
   { timestamps: true }
 );
 
-const Company = mongoose.model('Company', companySchema);
+// one recruiter cannot create same company twice
+companySchema.index({ companyName: 1, userId: 1 }, { unique: true });
+
+const Company = mongoose.model("Company", companySchema);
+
 module.exports = Company;

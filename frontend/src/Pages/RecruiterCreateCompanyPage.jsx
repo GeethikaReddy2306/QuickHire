@@ -1,86 +1,88 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../style/CreateCompanyPage.css";
+import "../style/RecruiterCreateCompanyPage.css";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
-export default function CreateCompanyPage() {
-  const [name, setName] = useState("");
+export default function RecruiterCreateCompanyPage() {
+  const navigate = useNavigate();
+
+  const [companyName, setCompanyName] = useState("");
   const [description, setDescription] = useState("");
   const [website, setWebsite] = useState("");
   const [location, setLocation] = useState("");
   const [error, setError] = useState("");
-
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   async function handleCreateCompany(e) {
     e.preventDefault();
     setError("");
 
-    if (!name || !description || !website || !location) {
-      setError("Please fill all company details");
+    if (!companyName.trim()) {
+      setError("Company name is required");
       return;
     }
 
     try {
-      const companyData = {
-        name,
-        description,
-        website,
-        location
-      };
+      setLoading(true);
 
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/api/company/register`,
-        companyData,
+        {
+          companyName,
+          description,
+          website,
+          location
+        },
         { withCredentials: true }
       );
 
-      console.log(response.data);
-      toast.success("Company created successfully!");
+      toast.success(response.data.message || "Company created successfully");
 
-      setName("");
+      setCompanyName("");
       setDescription("");
       setWebsite("");
       setLocation("");
 
       setTimeout(() => {
-        navigate("/recruiter/dashboard");
-      }, 1200);
+        navigate("/recruiter/companies");
+      }, 1000);
     } catch (err) {
       console.log(err);
       setError(err.response?.data?.message || "Failed to create company");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
     <section className="create-company-page">
-      <div className="create-company-card">
-        <h2>Add Your Company</h2>
-        <p className="company-subtext">
-          Create your company profile before posting jobs on QuickHire.
-        </p>
+      <div className="create-company-container">
+        <div className="create-company-header">
+          <h1>Add Your Company</h1>
+          <p>Create your company profile before posting jobs on QuickHire.</p>
+        </div>
 
-        {error && <p className="error-message">{error}</p>}
+        <form className="create-company-form" onSubmit={handleCreateCompany}>
+          {error && <p className="error-message">{error}</p>}
 
-        <form className="company-form" onSubmit={handleCreateCompany}>
           <div className="input-group">
             <label>Company Name</label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
               placeholder="Enter company name"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
             />
           </div>
 
           <div className="input-group">
             <label>Description</label>
             <textarea
-              rows="4"
+              rows="5"
+              placeholder="Enter company description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Write about your company"
             />
           </div>
 
@@ -88,9 +90,9 @@ export default function CreateCompanyPage() {
             <label>Website</label>
             <input
               type="text"
+              placeholder="Enter website"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
-              placeholder="Enter company website"
             />
           </div>
 
@@ -98,14 +100,14 @@ export default function CreateCompanyPage() {
             <label>Location</label>
             <input
               type="text"
+              placeholder="Enter location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Enter company location"
             />
           </div>
 
-          <button type="submit" className="create-company-btn">
-            Create Company
+          <button type="submit" className="create-company-btn" disabled={loading}>
+            {loading ? "Creating..." : "Create Company"}
           </button>
         </form>
       </div>

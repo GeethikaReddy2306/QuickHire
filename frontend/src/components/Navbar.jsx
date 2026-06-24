@@ -20,15 +20,61 @@ export default function Navbar() {
       {/* Menu Wrapper */}
       <div className={`menu ${menuOpen ? "active" : ""}`}>
         <ul>
-          <li>
-            <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
-          </li>
-          <li>
-            <Link to="/jobs" onClick={() => setMenuOpen(false)}>Jobs</Link>
-          </li>
-          <li>
-            <Link to="/browse" onClick={() => setMenuOpen(false)}>Browse</Link>
-          </li>
+          {/* If user not logged in */}
+          {!isAuthenticated && (
+            <>
+              <li>
+                <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
+              </li>
+              <li>
+                <Link to="/jobs" onClick={() => setMenuOpen(false)}>Jobs</Link>
+              </li>
+              <li>
+                <Link to="/browse" onClick={() => setMenuOpen(false)}>Browse</Link>
+              </li>
+            </>
+          )}
+
+          {/* Student Navbar */}
+          {isAuthenticated && user?.role === "student" && (
+            <>
+              <li>
+                <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
+              </li>
+              <li>
+                <Link to="/jobs" onClick={() => setMenuOpen(false)}>Jobs</Link>
+              </li>
+              <li>
+                <Link to="/browse" onClick={() => setMenuOpen(false)}>Browse</Link>
+              </li>
+            </>
+          )}
+
+          {/* Recruiter Navbar */}
+          {isAuthenticated && user?.role === "recruiter" && (
+            <>
+              <li>
+                <Link to="/recruiter/dashboard" onClick={() => setMenuOpen(false)}>
+                  Dashboard
+                </Link>
+              </li>
+              <li>
+                <Link to="/recruiter/companies" onClick={() => setMenuOpen(false)}>
+                  Companies
+                </Link>
+              </li>
+              <li>
+                <Link to="/recruiter/job/create" onClick={() => setMenuOpen(false)}>
+                  Post Job
+                </Link>
+              </li>
+              <li>
+                <Link to="/recruiter/jobs" onClick={() => setMenuOpen(false)}>
+                  My Jobs
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
 
         <div className="buttons">
@@ -44,25 +90,19 @@ export default function Navbar() {
             </>
           ) : (
             <div className="profile-box">
-  <Link
-    to="/profile"
-    className="profile-name"
-    onClick={() => setMenuOpen(false)}
-  >
-    Hi, {user?.name}
-  </Link>
+              <span className="profile-name">Hi, {user?.name}</span>
 
-  <button
-    id="logout"
-    onClick={() => {
-      logout();
-      setMenuOpen(false);
-      navigate("/login");
-    }}
-  >
-    Logout
-  </button>
-</div>
+              <button
+                id="logout"
+                onClick={() => {
+                  logout();
+                  setMenuOpen(false);
+                  navigate("/login");
+                }}
+              >
+                Logout
+              </button>
+            </div>
           )}
         </div>
       </div>

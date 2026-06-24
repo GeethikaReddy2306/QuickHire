@@ -137,4 +137,49 @@ async function getAdminJob(req, res) {
   }
 }
 
-module.exports = { postJob, getAdminJob, getJobId, getAllJobs };
+async function closeJob(req, res) {
+  try {
+    const jobId = req.params.id;
+    const recruiterId = req.id;
+
+    const job = await Job.findOneAndUpdate(
+      {
+        _id: jobId,
+        createdUser: recruiterId
+      },
+      {
+        status: "closed"
+      },
+      {
+        new: true
+      }
+    );
+
+    if (!job) {
+      return res.status(404).json({
+        message: "Job not found or unauthorized",
+        success: false
+      });
+    }
+
+    return res.status(200).json({
+      message: "Job closed successfully",
+      success: true,
+      job
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: "Something went wrong",
+      success: false
+    });
+  }
+}
+
+module.exports = {
+  postJob,
+  getAdminJob,
+  getJobId,
+  getAllJobs,
+  closeJob
+};

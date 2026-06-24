@@ -1,8 +1,24 @@
-const{updateProfile,registerUser,login}=require('../controllers/user.controller');
-const express=require('express');
-const router=express.Router();
-const isAuthenticated=require('../middleware/auth');
-router.post('/register',registerUser);
-router.post('/login',login);
-router.put('/profile/update', isAuthenticated, updateProfile);
-module.exports=router;
+const express = require("express");
+const router = express.Router();
+
+const {
+  registerUser,
+  login,
+  updateProfile
+} = require("../controllers/user.controller");
+
+const isAuthenticated = require("../middleware/auth");
+const upload = require("../middleware/multer");
+
+router.post("/register", registerUser);
+router.post("/login", login);
+
+// resume file field name = "resume"
+router.put(
+  "/profile/update",
+  isAuthenticated,
+  upload.single("resume"),
+  updateProfile
+);
+
+module.exports = router;
