@@ -1,3 +1,4 @@
+const Application = require("../models/application.model");
 const Company = require("../models/company.model");
 const Job = require("../models/job.model");
 const { successResponse, errorResponse } = require("../utils/response");
@@ -96,16 +97,21 @@ async function postJob(req, res) {
 async function getAllJobs(req, res) {
   try {
     const keyword = req.query.keyword || "";
+    const query = {};
 
-    const query = keyword
-      ? {
-          $or: [
-            { title: { $regex: keyword, $options: "i" } },
-            { description: { $regex: keyword, $options: "i" } },
-            { location: { $regex: keyword, $options: "i" } }
-          ]
-        }
-      : {};
+    if (keyword) {
+      query.$or = [
+        { title: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+        { location: { $regex: keyword, $options: "i" } }
+      ];
+    }
+
+    if (req.role === "student") {
+      const appliedJobIds = await Application.distinct("job", { applicant: req.id });
+      query.status = "open";
+      query._id = { $nin: appliedJobIds };
+    }
 
     const jobs = await Job.find(query)
       .populate("company")
@@ -120,7 +126,13 @@ async function getAllJobs(req, res) {
 
 async function getJobId(req, res) {
   try {
-    const job = await Job.findById(req.params.id).populate("company");
+    const query = { _id: req.params.id };
+
+    if (req.role === "student") {
+      query.status = "open";
+    }
+
+    const job = await Job.findOne(query).populate("company");
 
     if (!job) {
       return errorResponse(res, 404, "Job not found");
@@ -183,3 +195,4 @@ module.exports = {
   getAllJobs,
   closeJob
 };
+

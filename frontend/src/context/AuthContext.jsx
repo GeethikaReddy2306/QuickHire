@@ -1,17 +1,14 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
+function getStoredUser() {
+  const storedUser = localStorage.getItem("quickhireUser");
+  return storedUser ? JSON.parse(storedUser) : null;
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("quickhireUser");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
+  const [user, setUser] = useState(getStoredUser);
   const isAuthenticated = !!user;
 
   const logout = () => {

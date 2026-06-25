@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../style/RecruiterApplicantsPage.css";
 import axios from "axios";
@@ -12,11 +12,7 @@ export default function RecruiterApplicantsPage() {
   const [error, setError] = useState("");
   const [loadingId, setLoadingId] = useState("");
 
-  useEffect(() => {
-    fetchApplicants();
-  }, [jobId]);
-
-  async function fetchApplicants() {
+  const fetchApplicants = useCallback(async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/api/application/${jobId}/applicants`,
@@ -31,7 +27,11 @@ export default function RecruiterApplicantsPage() {
       console.log(err);
       setError("Failed to fetch applicants");
     }
-  }
+  }, [jobId]);
+
+  useEffect(() => {
+    fetchApplicants();
+  }, [fetchApplicants]);
 
   async function handleStatusUpdate(applicationId, status) {
     try {

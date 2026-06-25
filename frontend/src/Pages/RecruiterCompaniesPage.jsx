@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import "../style/RecruiterCompaniesPage.css";
@@ -7,11 +7,7 @@ export default function RecruiterCompaniesPage() {
   const [companies, setCompanies] = useState([]);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
-
-  async function fetchCompanies() {
+  const fetchCompanies = useCallback(async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/api/company/get`,
@@ -23,7 +19,11 @@ export default function RecruiterCompaniesPage() {
       console.log(err);
       setError("Failed to fetch companies");
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [fetchCompanies]);
 
   return (
     <section className="recruiter-companies-page">
@@ -44,7 +44,7 @@ export default function RecruiterCompaniesPage() {
         {companies.length === 0 ? (
           <div className="empty-company-box">
             <h3>No companies found</h3>
-            <p>You haven’t created any company yet.</p>
+            <p>You haven't created any company yet.</p>
             <Link to="/recruiter/company/create" className="create-company-link">
               Create Company
             </Link>

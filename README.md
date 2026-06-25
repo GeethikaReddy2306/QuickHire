@@ -1,215 +1,179 @@
-# Quick Hire – Job Portal Web Application
+# QuickHire
 
-## 📌 Project Overview
+QuickHire is a full-stack MERN job portal for students and recruiters.
 
-Quick Hire is a full-stack job portal web application designed to connect job seekers with recruiters. The platform allows users to browse job opportunities, apply for jobs, manage applications, and explore company profiles through a modern and user-friendly interface.
+Students can register, log in, manage a profile, upload a resume and profile photo, browse open jobs, apply for jobs, and track application status. Recruiters can create companies, post jobs, close jobs, view applicants, download resumes through signed S3 URLs, and update application status.
 
-The main goal of Quick Hire is to simplify the hiring process by providing an efficient platform where candidates can discover opportunities and recruiters can find suitable talent.
-
----
-
-## 🚀 Features
-
-### 👨‍💼 Job Seeker Features
-
-* User Registration and Login
-* Secure Authentication
-* Browse Available Jobs
-* Search and Filter Jobs
-* View Job Details
-* Apply for Jobs
-* Upload Resume
-* Track Application Status
-* Manage User Profile
-
-### 🏢 Recruiter Features
-
-* Recruiter Registration and Login
-* Post New Jobs
-* Update Job Listings
-* Delete Job Listings
-* View Applicants
-* Manage Recruitment Process
-
-### 🌟 Additional Features
-
-* Responsive Design
-* Protected Routes
-* Form Validation
-* Error Handling
-* JWT Authentication
-* Cloud-Based Resume Storage
-* Modern User Interface
-
----
-
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
-
-* React.js
-* React Router DOM
-* Axios
-* CSS3
-* HTML5
+- React + Vite
+- React Router
+- Axios
+- React Toastify
+- Chart.js
+- Plain CSS
 
 ### Backend
+- Node.js
+- Express
+- MongoDB + Mongoose
+- JWT authentication with cookies
+- bcrypt
+- multer memory storage
+- AWS S3 with AWS SDK v3
 
-* Node.js
-* Express.js
+## Project Structure
 
-### Database
-
-* MongoDB
-* Mongoose
-
-### Authentication
-
-* JSON Web Token (JWT)
-* bcrypt.js
-
-### File Upload
-
-* Multer
-* Cloudinary
-
----
-
-## 📂 Project Structure
-
-```
-Quick-Hire/
-│
-├── client/
-│   ├── src/
-│   │   ├── Components/
-│   │   ├── Pages/
-│   │   ├── Routes/
-│   │   ├── Services/
-│   │   └── App.jsx
-│   │
-│   └── public/
-│
-├── server/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── middleware/
-│   ├── config/
-│   └── server.js
-│
-├── package.json
-└── README.md
+```text
+QuickHire/
+  backend/
+    config/
+    controllers/
+    middleware/
+    models/
+    routes/
+    utils/
+    index.js
+  frontend/
+    src/
+      components/
+      context/
+      Pages/
+      style/
 ```
 
----
+## Environment Variables
 
-## ⚙️ Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/GeethikaReddy2306/quick-hire.git
-```
-
-### Navigate to Project
-
-```bash
-cd quick-hire
-```
-
-### Install Frontend Dependencies
-
-```bash
-cd client
-npm install
-```
-
-### Install Backend Dependencies
-
-```bash
-cd ../server
-npm install
-```
-
----
-
-## 🔑 Environment Variables
-
-Create a `.env` file inside the server folder.
+Create `backend/.env` from `backend/.env.example`:
 
 ```env
-PORT=5000
-
-MONGODB_URI=your_mongodb_connection_string
-
-JWT_SECRET=your_jwt_secret
-
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-
-CLOUDINARY_API_KEY=your_api_key
-
-CLOUDINARY_API_SECRET=your_api_secret
+PORT=8000
+MONGO_URL=your_mongodb_connection_string
+CLIENT_URL=http://localhost:5173
+JWT_SECRET=your_long_random_jwt_secret
+NODE_ENV=development
+AWS_ACCESS_KEY_ID=your_aws_access_key_id
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+AWS_REGION=ap-south-1
+AWS_BUCKET_NAME=your_s3_bucket_name
 ```
 
----
+Create `frontend/.env` from `frontend/.env.example`:
 
-## ▶️ Running the Application
+```env
+VITE_SERVER_URL=http://localhost:8000
+```
 
-### Start Backend
+Never commit real `.env` files.
+
+## Local Development
+
+Install backend dependencies:
 
 ```bash
-cd server
+cd backend
+npm install
 npm run dev
 ```
 
-### Start Frontend
+Install frontend dependencies:
 
 ```bash
-cd client
+cd frontend
+npm install
+npm run dev
+```
+
+Default URLs:
+
+```text
+Frontend: http://localhost:5173
+Backend:  http://localhost:8000
+```
+
+## Production Build
+
+Frontend:
+
+```bash
+cd frontend
+npm run build
+```
+
+Backend syntax check:
+
+```bash
+cd backend
+node --check index.js
+```
+
+## Deployment Notes
+
+### Backend
+Deploy `backend/` to a Node hosting provider such as Render, Railway, or an EC2/App Service instance.
+
+Use:
+
+```bash
+npm install
 npm start
 ```
 
-Application will run on:
+Set all backend environment variables in the hosting dashboard. Set `CLIENT_URL` to the deployed frontend URL. In production, cookies use `secure: true` and `sameSite: none`, so HTTPS is required.
+
+### Frontend
+Deploy `frontend/` to Vercel, Netlify, or any static hosting provider.
+
+Use:
 
 ```bash
-Frontend: http://localhost:5173/
-
-Backend: http://localhost:5000
+npm install
+npm run build
 ```
 
----
+Build output directory:
 
-## 📸 Screens
+```text
+dist
+```
 
-* Home Page
-* Login Page
-* Register Page
-* Job Listings Page
-* Job Details Page
-* Profile Page
-* Recruiter Dashboard
+Set `VITE_SERVER_URL` to the deployed backend URL.
 
----
+## Core API Routes
 
-## 🎯 Future Enhancements
+### User
+- `POST /api/user/register`
+- `POST /api/user/login`
+- `PUT /api/user/profile/update`
+- `GET /api/user/resume/:id`
 
-* Real-Time Chat Between Recruiters and Candidates
-* Email Notifications
-* AI-Based Resume Screening
-* Interview Scheduling
-* Company Reviews and Ratings
-* Referral System
-* Job Recommendations using Machine Learning
+### Company
+- `POST /api/company/register`
+- `GET /api/company/get`
+- `GET /api/company/get/:id`
+- `PATCH /api/company/update/:id`
 
----
+### Job
+- `POST /api/job/post`
+- `GET /api/job/get`
+- `GET /api/job/get/:id`
+- `GET /api/job/admin`
+- `PATCH /api/job/close/:id`
 
-## 👨‍💻 Author
+### Application
+- `POST /api/application/apply/:id`
+- `GET /api/application/get`
+- `GET /api/application/:id/applicants`
+- `PATCH /api/application/status/:id`
 
-Developed as a full-stack MERN Project to simplify job searching and recruitment processes.
+## Production Checklist
 
----
-
-## 📄 License
-
-This project is developed for educational and learning purposes.
+- MongoDB connection string configured
+- JWT secret is long and random
+- AWS S3 bucket exists in the configured region
+- S3 credentials have permission for `PutObject` and `GetObject`
+- Frontend `VITE_SERVER_URL` points to the backend URL
+- Backend `CLIENT_URL` points to the frontend URL
+- Both frontend and backend use HTTPS in production
+- Real `.env` files are not committed

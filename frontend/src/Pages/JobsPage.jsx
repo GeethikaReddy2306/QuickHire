@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "../style/JobsPage.css";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -14,11 +14,7 @@ export default function JobsPage() {
   const [loading, setLoading] = useState(true);
   const [applyingId, setApplyingId] = useState("");
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
-
-  async function fetchJobs() {
+  const fetchJobs = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -35,7 +31,11 @@ export default function JobsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
 
   async function handleApply(jobId) {
     try {
@@ -46,7 +46,8 @@ export default function JobsPage() {
         { withCredentials: true }
       );
 
-      toast.success(response.data.message || "Applied successfully");
+      toast.success(response.data.message || "Job applied successfully");
+      setJobs((currentJobs) => currentJobs.filter((job) => job._id !== jobId));
     } catch (err) {
       console.log(err);
       toast.error(err.response?.data?.message || "Failed to apply");
@@ -81,18 +82,29 @@ export default function JobsPage() {
               placeholder="Search by title, company, or location..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search jobs"
             />
           </div>
         </div>
 
         {loading ? (
-          <p className="jobs-message">Loading jobs...</p>
+          <div className="jobs-grid" aria-label="Loading jobs">
+            {[1, 2, 3].map((item) => (
+              <div className="job-card skeleton-card" key={item}>
+                <span className="skeleton-line wide" />
+                <span className="skeleton-line" />
+                <span className="skeleton-line tall" />
+                <span className="skeleton-line button" />
+              </div>
+            ))}
+          </div>
         ) : error ? (
           <p className="jobs-message error-message">{error}</p>
         ) : filteredJobs.length === 0 ? (
           <div className="empty-jobs-box">
-            <h3>No jobs found</h3>
-            <p>There are no jobs matching your search right now.</p>
+            <div className="empty-icon">Jobs</div>
+            <h3>No available jobs</h3>
+            <p>New matching roles will appear here as recruiters publish them.</p>
           </div>
         ) : (
           <div className="jobs-grid">
@@ -147,19 +159,14 @@ export default function JobsPage() {
                   </Link>
 
                   {user?.role === "student" ? (
-                    job.status === "closed" ? (
-                      <button className="job-btn closed-btn" disabled>
-                        Job Closed
-                      </button>
-                    ) : (
-                      <button
-                        className="job-btn apply-btn"
-                        disabled={applyingId === job._id}
-                        onClick={() => handleApply(job._id)}
-                      >
-                        {applyingId === job._id ? "Applying..." : "Apply Job"}
-                      </button>
-                    )
+                    <button
+                      className="job-btn apply-btn"
+                      disabled={applyingId === job._id}
+                      onClick={() => handleApply(job._id)}
+                      aria-label={`Apply to ${job.title}`}
+                    >
+                      {applyingId === job._id ? "Applying..." : "Apply Job"}
+                    </button>
                   ) : (
                     <button className="job-btn closed-btn" disabled>
                       Recruiter View
@@ -174,3 +181,4 @@ export default function JobsPage() {
     </section>
   );
 }
+

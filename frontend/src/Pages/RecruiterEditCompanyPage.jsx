@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "../style/RecruiterCreateCompanyPage.css";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -16,11 +16,7 @@ export default function RecruiterEditCompanyPage() {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
 
-  useEffect(() => {
-    fetchCompanyDetails();
-  }, [id]);
-
-  async function fetchCompanyDetails() {
+  const fetchCompanyDetails = useCallback(async () => {
     try {
       setFetchLoading(true);
 
@@ -41,7 +37,11 @@ export default function RecruiterEditCompanyPage() {
     } finally {
       setFetchLoading(false);
     }
-  }
+  }, [id]);
+
+  useEffect(() => {
+    fetchCompanyDetails();
+  }, [fetchCompanyDetails]);
 
   async function handleUpdateCompany(e) {
     e.preventDefault();

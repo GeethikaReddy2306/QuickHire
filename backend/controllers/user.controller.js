@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { PutObjectCommand } = require("@aws-sdk/client-s3");
-const { GetObjectCommand } = require("@aws-sdk/client-s3");
+const { PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const User = require("../models/user.model");
 const s3 = require("../utils/s3");
@@ -35,8 +34,12 @@ function parseSkills(skills) {
   return [];
 }
 
-async function uploadResume(file, userId) {
-  const bucketName = process.env.AWS_S3_BUCKET_NAME || process.env.AWS_BUCKET_NAME;
+function getBucketName() {
+  return process.env.AWS_S3_BUCKET_NAME || process.env.AWS_BUCKET_NAME;
+}
+
+async function uploadToS3(file, userId, folder) {
+  const bucketName = getBucketName();
   const region = process.env.AWS_REGION;
 
   if (!bucketName || !region) {
@@ -44,7 +47,7 @@ async function uploadResume(file, userId) {
   }
 
   const safeFileName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "-");
-  const key = `resumes/${userId}/${Date.now()}-${safeFileName}`;
+  const key = `${folder}/${userId}/${Date.now()}-${safeFileName}`;
 
   await s3.send(
     new PutObjectCommand({
@@ -56,7 +59,7 @@ async function uploadResume(file, userId) {
   );
 
   return {
-    resumeUrl: `https://${bucketName}.s3.${region}.amazonaws.com/${key}`,
+    url: `https://${bucketName}.s3.${region}.amazonaws.com/${key}`,
     originalName: file.originalname
   };
 }
@@ -197,10 +200,18 @@ async function updateProfile(req, res) {
     if (bio !== undefined) user.profile.bio = bio;
     if (skills !== undefined) user.profile.skills = parseSkills(skills);
 
-    if (req.file) {
-      const uploadedResume = await uploadResume(req.file, userId);
-      user.profile.resume = uploadedResume.resumeUrl;
+    const resumeFile = req.files?.resume?.[0];
+    const photoFile = req.files?.photo?.[0];
+
+    if (resumeFile) {
+      const uploadedResume = await uploadToS3(resumeFile, userId, "resumes");
+      user.profile.resume = uploadedResume.url;
       user.profile.resumeOriginalName = uploadedResume.originalName;
+    }
+
+    if (photoFile) {
+      const uploadedPhoto = await uploadToS3(photoFile, userId, "profile-photos");
+      user.profile.photo = uploadedPhoto.url;
     }
 
     await user.save();
@@ -220,9 +231,6 @@ async function updateProfile(req, res) {
 }
 
 async function downloadResume(req, res) {
-  console.log("downloadResume called");
-  console.log(req.params);
-
   try {
     const { id } = req.params;
 
@@ -236,16 +244,15 @@ async function downloadResume(req, res) {
       return errorResponse(res, 404, "Resume not found");
     }
 
-    const bucket = process.env.AWS_BUCKET_NAME;
-    const region = process.env.AWS_REGION;
+    const bucket = getBucketName();
 
-    // Extract object key from stored URL
+    if (!bucket) {
+      return errorResponse(res, 500, "AWS S3 bucket is not configured");
+    }
+
     const url = new URL(user.profile.resume);
-
     const key = decodeURIComponent(
-      url.pathname.startsWith("/")
-        ? url.pathname.slice(1)
-        : url.pathname
+      url.pathname.startsWith("/") ? url.pathname.slice(1) : url.pathname
     );
 
     const command = new GetObjectCommand({
@@ -262,7 +269,6 @@ async function downloadResume(req, res) {
       url: signedUrl,
       fileName: user.profile.resumeOriginalName
     });
-
   } catch (err) {
     console.log(err);
     return errorResponse(res, 500, "Unable to generate download link");
@@ -272,5 +278,6 @@ async function downloadResume(req, res) {
 module.exports = {
   registerUser,
   login,
-  updateProfile,downloadResume
+  updateProfile,
+  downloadResume
 };

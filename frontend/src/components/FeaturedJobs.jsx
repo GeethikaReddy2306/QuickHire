@@ -1,65 +1,90 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 import "../style/FeaturedJobs.css";
 
+const fallbackJobs = [
+  {
+    _id: "fallback-1",
+    company: { companyName: "Google" },
+    title: "Frontend Developer",
+    location: "Hyderabad, India",
+    requirement: ["React", "JavaScript", "Full Time"],
+    salary: "8 - 12 LPA"
+  },
+  {
+    _id: "fallback-2",
+    company: { companyName: "Amazon" },
+    title: "Backend Developer",
+    location: "Bangalore, India",
+    requirement: ["Node.js", "Express", "MongoDB"],
+    salary: "10 - 15 LPA"
+  },
+  {
+    _id: "fallback-3",
+    company: { companyName: "Microsoft" },
+    title: "UI/UX Designer Intern",
+    location: "Remote",
+    requirement: ["Figma", "Internship", "Design"],
+    salary: "25,000 / month"
+  }
+];
+
 export default function FeaturedJobs() {
+  const { isAuthenticated } = useAuth();
+  const [jobs, setJobs] = useState(fallbackJobs);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    async function fetchFeaturedJobs() {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_SERVER_URL}/api/job/get`,
+          { withCredentials: true }
+        );
+        setJobs((response.data.jobs || []).slice(0, 3));
+      } catch (error) {
+        console.log("Featured jobs fetch error:", error);
+      }
+    }
+
+    fetchFeaturedJobs();
+  }, [isAuthenticated]);
+
   return (
     <section id="featured-jobs">
       <div className="featured-heading">
         <h2>Featured Jobs</h2>
-        <p>Explore the latest openings from top companies hiring now.</p>
+        <p>Explore the latest openings from companies hiring now.</p>
       </div>
 
       <div className="jobs-container">
-        {/* Job Card 1 */}
-        <div className="job-card">
-          <p className="company-name">Google</p>
-          <h3>Frontend Developer</h3>
-          <p className="job-location">Hyderabad, India</p>
+        {jobs.map((job) => (
+          <div className="job-card" key={job._id}>
+            <p className="company-name">{job.company?.companyName || "Company"}</p>
+            <h3>{job.title}</h3>
+            <p className="job-location">{job.location}</p>
 
-          <div className="job-tags">
-            <span>React</span>
-            <span>JavaScript</span>
-            <span>Full Time</span>
+            <div className="job-tags">
+              {(job.requirement || []).slice(0, 3).map((item, index) => (
+                <span key={`${job._id}-${index}`}>{item}</span>
+              ))}
+            </div>
+
+            <p className="salary">Rs. {job.salary}</p>
+            {String(job._id).startsWith("fallback") ? (
+              <Link to="/jobs" className="featured-card-btn">View Jobs</Link>
+            ) : (
+              <Link to={`/jobs/${job._id}`} className="featured-card-btn">View Details</Link>
+            )}
           </div>
-
-          <p className="salary">₹8 - ₹12 LPA</p>
-          <button>View Details</button>
-        </div>
-
-        {/* Job Card 2 */}
-        <div className="job-card">
-          <p className="company-name">Amazon</p>
-          <h3>Backend Developer</h3>
-          <p className="job-location">Bangalore, India</p>
-
-          <div className="job-tags">
-            <span>Node.js</span>
-            <span>Express</span>
-            <span>MongoDB</span>
-          </div>
-
-          <p className="salary">₹10 - ₹15 LPA</p>
-          <button>View Details</button>
-        </div>
-
-        {/* Job Card 3 */}
-        <div className="job-card">
-          <p className="company-name">Microsoft</p>
-          <h3>UI/UX Designer Intern</h3>
-          <p className="job-location">Remote</p>
-
-          <div className="job-tags">
-            <span>Figma</span>
-            <span>Internship</span>
-            <span>Design</span>
-          </div>
-
-          <p className="salary">₹25,000 / month</p>
-          <button>View Details</button>
-        </div>
+        ))}
       </div>
 
       <div className="featured-btn">
-        <button>Browse All Jobs</button>
+        <Link to="/jobs">Browse All Jobs</Link>
       </div>
     </section>
   );
