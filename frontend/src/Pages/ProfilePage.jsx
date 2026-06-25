@@ -13,7 +13,9 @@ export default function ProfilePage() {
   const [email, setEmail] = useState(user?.email || "");
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || "");
   const [bio, setBio] = useState(user?.profile?.bio || "");
-  const [skills, setSkills] = useState(user?.profile?.skills?.join(", ") || "");
+  const [skills, setSkills] = useState(
+    user?.profile?.skills?.join(", ") || ""
+  );
   const [resumeFile, setResumeFile] = useState(null);
 
   const [error, setError] = useState("");
@@ -34,7 +36,7 @@ export default function ProfilePage() {
     e.preventDefault();
     setError("");
 
-    if (!name || !email || !phoneNumber) {
+    if (!name.trim() || !email.trim() || !phoneNumber.trim()) {
       setError("Name, email and phone number are required");
       return;
     }
@@ -79,6 +81,18 @@ export default function ProfilePage() {
     }
   }
 
+  function handleCancelEdit() {
+    setIsEditing(false);
+    setError("");
+    setResumeFile(null);
+
+    setName(user?.name || "");
+    setEmail(user?.email || "");
+    setPhoneNumber(user?.phoneNumber || "");
+    setBio(user?.profile?.bio || "");
+    setSkills(user?.profile?.skills?.join(", ") || "");
+  }
+
   return (
     <section className="profile-page">
       <div className="profile-card">
@@ -88,9 +102,9 @@ export default function ProfilePage() {
           </div>
 
           <div className="profile-main-info">
-            <h2>{user.name}</h2>
-            <p>{user.email}</p>
-            <span className="role-badge">{user.role}</span>
+            <h2>{user?.name}</h2>
+            <p>{user?.email}</p>
+            <span className="role-badge">{user?.role}</span>
           </div>
         </div>
 
@@ -99,17 +113,17 @@ export default function ProfilePage() {
             <div className="profile-details">
               <div className="detail-box">
                 <h3>Phone Number</h3>
-                <p>{user.phoneNumber || "Not added yet"}</p>
+                <p>{user?.phoneNumber || "Not added yet"}</p>
               </div>
 
               <div className="detail-box">
                 <h3>Bio</h3>
-                <p>{user.profile?.bio || "No bio added yet"}</p>
+                <p>{user?.profile?.bio || "No bio added yet"}</p>
               </div>
 
               <div className="detail-box">
                 <h3>Skills</h3>
-                {user.profile?.skills?.length > 0 ? (
+                {user?.profile?.skills?.length > 0 ? (
                   <div className="skills-wrap">
                     {user.profile.skills.map((skill, index) => (
                       <span key={index} className="skill-chip">
@@ -124,7 +138,7 @@ export default function ProfilePage() {
 
               <div className="detail-box">
                 <h3>Resume</h3>
-                {user.profile?.resume ? (
+                {user?.profile?.resume ? (
                   <a
                     href={user.profile.resume}
                     target="_blank"
@@ -159,6 +173,7 @@ export default function ProfilePage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your full name"
                 />
               </div>
 
@@ -168,6 +183,7 @@ export default function ProfilePage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
                 />
               </div>
 
@@ -177,6 +193,7 @@ export default function ProfilePage() {
                   type="text"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="Enter your phone number"
                 />
               </div>
 
@@ -207,11 +224,13 @@ export default function ProfilePage() {
                   accept=".pdf,.doc,.docx"
                   onChange={(e) => setResumeFile(e.target.files[0])}
                 />
+
                 {user?.profile?.resumeOriginalName && !resumeFile && (
                   <p style={{ marginTop: "8px", fontSize: "14px" }}>
                     Current Resume: {user.profile.resumeOriginalName}
                   </p>
                 )}
+
                 {resumeFile && (
                   <p style={{ marginTop: "8px", fontSize: "14px" }}>
                     Selected File: {resumeFile.name}
@@ -224,7 +243,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 className="cancel-btn"
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancelEdit}
               >
                 Cancel
               </button>

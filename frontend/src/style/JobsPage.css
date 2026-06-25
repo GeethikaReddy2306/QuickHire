@@ -1,0 +1,260 @@
+.jobs-page {
+  min-height: 100vh;
+  background: #f6f7f4;
+  padding: 50px 20px 70px;
+}
+
+.jobs-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.jobs-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.jobs-heading h1 {
+  font-size: 42px;
+  color: #16213e;
+  margin-bottom: 10px;
+  line-height: 1.1;
+}
+
+.jobs-heading p {
+  font-size: 17px;
+  color: #667085;
+  max-width: 650px;
+  line-height: 1.6;
+}
+
+.jobs-search-box {
+  min-width: 320px;
+  flex: 1;
+  max-width: 420px;
+}
+
+.jobs-search-box input {
+  width: 100%;
+  height: 58px;
+  border: 1px solid #d8ddd2;
+  border-radius: 16px;
+  padding: 0 18px;
+  font-size: 15px;
+  outline: none;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.jobs-search-box input:focus {
+  border-color: #87967a;
+  box-shadow: 0 0 0 3px rgba(135, 150, 122, 0.15);
+}
+
+.jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 28px;
+}
+
+.job-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 26px;
+  box-shadow: 0 14px 40px rgba(22, 33, 62, 0.08);
+  border: 1px solid #eef0ea;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 45px rgba(22, 33, 62, 0.12);
+}
+
+.job-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.job-card-header h2 {
+  font-size: 31px;
+  line-height: 1.2;
+  color: #16213e;
+  margin-bottom: 8px;
+  text-transform: capitalize;
+}
+
+.company-name {
+  font-size: 16px;
+  color: #87967a;
+  font-weight: 600;
+}
+
+.job-status {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.job-status.open {
+  background: #dff4e4;
+  color: #188247;
+}
+
+.job-status.closed {
+  background: #f8d9d9;
+  color: #b42318;
+}
+
+.job-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: #667085;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.job-description {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #475467;
+  min-height: 52px;
+}
+
+.job-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.experience-text {
+  font-size: 17px;
+  color: #16213e;
+  margin: 0;
+}
+
+.requirements-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.requirement-chip {
+  background: #f1f4ff;
+  color: #4b4fd3;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.job-actions {
+  margin-top: auto;
+}
+
+.job-btn {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  outline: none;
+  box-shadow: none;
+}
+
+.apply-btn {
+  background: #87967a;
+  color: #ffffff;
+}
+
+.apply-btn:hover {
+  background: #748466;
+  color: #ffffff;
+}
+
+.apply-btn:focus,
+.apply-btn:active {
+  background: #748466;
+  color: #ffffff;
+  outline: none;
+  box-shadow: none;
+}
+
+.closed-btn {
+  background: #e7ebdf;
+  color: #5b6453;
+  cursor: not-allowed;
+}
+
+.jobs-message {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 16px;
+  color: #667085;
+}
+
+.error-message {
+  color: #b42318;
+}
+
+.empty-jobs-box {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 60px 20px;
+  text-align: center;
+  box-shadow: 0 14px 40px rgba(22, 33, 62, 0.06);
+}
+
+.empty-jobs-box h3 {
+  font-size: 28px;
+  color: #16213e;
+  margin-bottom: 10px;
+}
+
+.empty-jobs-box p {
+  color: #667085;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .jobs-page {
+    padding: 30px 16px 50px;
+  }
+
+  .jobs-heading h1 {
+    font-size: 32px;
+  }
+
+  .jobs-search-box {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .job-card {
+    padding: 20px;
+  }
+
+  .job-card-header h2 {
+    font-size: 24px;
+  }
+
+  .job-btn {
+    font-size: 16px;
+  }
+}

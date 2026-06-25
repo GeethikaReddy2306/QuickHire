@@ -1,4 +1,4 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client } = require("@aws-sdk/client-s3");
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -8,21 +8,4 @@ const s3 = new S3Client({
   }
 });
 
-async function uploadFileToS3(file, folder = "resumes") {
-  const fileName = `${folder}/${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`;
-
-  const params = {
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Key: fileName,
-    Body: file.buffer,
-    ContentType: file.mimetype
-  };
-
-  await s3.send(new PutObjectCommand(params));
-
-  const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
-
-  return fileUrl;
-}
-
-module.exports = { uploadFileToS3 };
+module.exports = s3;

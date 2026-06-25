@@ -13,7 +13,7 @@ const upload = require("../middleware/multer");
 router.post("/register", registerUser);
 router.post("/login", login);
 
-// resume file field name = "resume"
+// IMPORTANT: upload.single("resume")
 router.put(
   "/profile/update",
   isAuthenticated,
