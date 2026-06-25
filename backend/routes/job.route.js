@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const {
@@ -7,14 +7,15 @@ const {
   getJobId,
   getAllJobs,
   closeJob
-} = require('../controllers/job.controller');
+} = require("../controllers/job.controller");
 
-const isAuthenticated = require('../middleware/auth');
+const isAuthenticated = require("../middleware/auth");
 
-router.post('/post', isAuthenticated, postJob);
-router.get('/get', isAuthenticated, getAllJobs);
-router.get('/getadminJobs', isAuthenticated, getAdminJob);
-router.get('/get/:id', isAuthenticated, getJobId);
-router.patch('/close/:id', isAuthenticated, closeJob);
+router.post("/post", isAuthenticated, postJob);
+router.get("/get", isAuthenticated, getAllJobs);
+router.get("/admin", isAuthenticated, getAdminJob);
+router.get("/getadminJobs", isAuthenticated, getAdminJob);
+router.get("/get/:id", isAuthenticated, getJobId);
+router.patch("/close/:id", isAuthenticated, closeJob);
 
 module.exports = router;

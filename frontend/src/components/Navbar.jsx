@@ -8,71 +8,43 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
+  function closeMenu() {
+    setMenuOpen(false);
+  }
+
   return (
     <nav id="navbar">
-      {/* Logo */}
-      <div className="logo">
+      <Link to="/" className="logo" onClick={closeMenu}>
         <h1>
           Quick<span>Hire</span>
         </h1>
-      </div>
+      </Link>
 
-      {/* Menu Wrapper */}
       <div className={`menu ${menuOpen ? "active" : ""}`}>
         <ul>
-          {/* If user not logged in */}
           {!isAuthenticated && (
             <>
-              <li>
-                <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
-              </li>
-              <li>
-                <Link to="/jobs" onClick={() => setMenuOpen(false)}>Jobs</Link>
-              </li>
-              <li>
-                <Link to="/browse" onClick={() => setMenuOpen(false)}>Browse</Link>
-              </li>
+              <li><Link to="/" onClick={closeMenu}>Home</Link></li>
+              <li><Link to="/jobs" onClick={closeMenu}>Jobs</Link></li>
+              <li><Link to="/browse" onClick={closeMenu}>Browse</Link></li>
             </>
           )}
 
-          {/* Student Navbar */}
           {isAuthenticated && user?.role === "student" && (
             <>
-              <li>
-                <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
-              </li>
-              <li>
-                <Link to="/jobs" onClick={() => setMenuOpen(false)}>Jobs</Link>
-              </li>
-              <li>
-                <Link to="/browse" onClick={() => setMenuOpen(false)}>Browse</Link>
-              </li>
+              
+              <li><Link to="/jobs" onClick={closeMenu}>Jobs</Link></li>
+              <li><Link to="/applied-jobs" onClick={closeMenu}>Applied Jobs</Link></li>
+              <li><Link to="/profile" onClick={closeMenu}>Profile</Link></li>
             </>
           )}
 
-          {/* Recruiter Navbar */}
           {isAuthenticated && user?.role === "recruiter" && (
             <>
-              <li>
-                <Link to="/recruiter/dashboard" onClick={() => setMenuOpen(false)}>
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link to="/recruiter/companies" onClick={() => setMenuOpen(false)}>
-                  Companies
-                </Link>
-              </li>
-              <li>
-                <Link to="/recruiter/job/create" onClick={() => setMenuOpen(false)}>
-                  Post Job
-                </Link>
-              </li>
-              <li>
-                <Link to="/recruiter/jobs" onClick={() => setMenuOpen(false)}>
-                  My Jobs
-                </Link>
-              </li>
+              <li><Link to="/recruiter/dashboard" onClick={closeMenu}>Dashboard</Link></li>
+              <li><Link to="/recruiter/companies" onClick={closeMenu}>Companies</Link></li>
+              <li><Link to="/recruiter/job/create" onClick={closeMenu}>Post Job</Link></li>
+              <li><Link to="/recruiter/jobs" onClick={closeMenu}>My Jobs</Link></li>
             </>
           )}
         </ul>
@@ -80,23 +52,17 @@ export default function Navbar() {
         <div className="buttons">
           {!isAuthenticated ? (
             <>
-              <Link to="/login">
-                <button id="login" onClick={() => setMenuOpen(false)}>Login</button>
-              </Link>
-
-              <Link to="/signup">
-                <button id="signup" onClick={() => setMenuOpen(false)}>Sign Up</button>
-              </Link>
+              <Link to="/login"><button id="login" onClick={closeMenu}>Login</button></Link>
+              <Link to="/signup"><button id="signup" onClick={closeMenu}>Sign Up</button></Link>
             </>
           ) : (
             <div className="profile-box">
               <span className="profile-name">Hi, {user?.name}</span>
-
               <button
                 id="logout"
                 onClick={() => {
                   logout();
-                  setMenuOpen(false);
+                  closeMenu();
                   navigate("/login");
                 }}
               >
@@ -107,10 +73,14 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Hamburger */}
-      <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
-        {menuOpen ? "✕" : "☰"}
-      </div>
+      <button
+        type="button"
+        className="hamburger"
+        aria-label="Toggle navigation"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        {menuOpen ? "X" : "Menu"}
+      </button>
     </nav>
   );
 }

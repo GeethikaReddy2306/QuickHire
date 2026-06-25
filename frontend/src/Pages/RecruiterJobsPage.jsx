@@ -15,14 +15,14 @@ export default function RecruiterJobsPage() {
   async function fetchRecruiterJobs() {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/api/job/getadminJobs`,
+        `${import.meta.env.VITE_SERVER_URL}/api/job/admin`,
         { withCredentials: true }
       );
 
       setJobs(response.data.jobs || []);
     } catch (err) {
       console.log(err);
-      setError("Failed to fetch recruiter jobs");
+      setError(err.response?.data?.message || "Failed to fetch recruiter jobs");
     }
   }
 
@@ -78,12 +78,12 @@ export default function RecruiterJobsPage() {
                 <div className="job-info">
                   <span>{job.location}</span>
                   <span>{job.jobType}</span>
-                  <span>₹{job.salary}</span>
+                  <span>Rs. {job.salary}</span>
                 </div>
 
                 <p className="job-description">
-                  {job.description.length > 120
-                    ? job.description.slice(0, 120) + "..."
+                  {job.description?.length > 120
+                    ? `${job.description.slice(0, 120)}...`
                     : job.description}
                 </p>
 

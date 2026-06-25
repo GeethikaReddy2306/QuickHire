@@ -1,7 +1,35 @@
-const Job = require('../models/job.model');
+const Company = require("../models/company.model");
+const Job = require("../models/job.model");
+const { successResponse, errorResponse } = require("../utils/response");
+
+function requireRecruiter(req, res) {
+  if (req.role !== "recruiter") {
+    errorResponse(res, 403, "Only recruiters can access this resource");
+    return false;
+  }
+
+  return true;
+}
+
+function parseRequirements(requirement) {
+  if (Array.isArray(requirement)) {
+    return requirement.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  if (typeof requirement === "string") {
+    return requirement
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
 
 async function postJob(req, res) {
   try {
+    if (!requireRecruiter(req, res)) return;
+
     const {
       title,
       description,
@@ -15,50 +43,53 @@ async function postJob(req, res) {
     } = req.body;
 
     if (
-      !title ||
-      !description ||
-      !requirement ||
-      !experienceLevel ||
+      !title?.trim() ||
+      !description?.trim() ||
+      !experienceLevel?.trim() ||
       !salary ||
-      !location ||
-      !jobType ||
-      !position ||
+      !location?.trim() ||
+      !jobType?.trim() ||
+      !position?.trim() ||
       !company
     ) {
-      return res.status(400).json({
-        message: "All fields are required",
-        success: false
-      });
+      return errorResponse(res, 400, "All fields are required");
     }
 
-    const requirementArray = Array.isArray(requirement)
-      ? requirement
-      : requirement.split(",").map((item) => item.trim());
+    const salaryValue = Number(salary);
+
+    if (Number.isNaN(salaryValue) || salaryValue < 0) {
+      return errorResponse(res, 400, "Salary must be a valid number");
+    }
+
+    const requirementArray = parseRequirements(requirement);
+
+    if (requirementArray.length === 0) {
+      return errorResponse(res, 400, "At least one requirement is required");
+    }
+
+    const recruiterCompany = await Company.findOne({ _id: company, userId: req.id });
+
+    if (!recruiterCompany) {
+      return errorResponse(res, 404, "Company not found or unauthorized");
+    }
 
     const job = await Job.create({
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       requirement: requirementArray,
-      experienceLevel,
-      salary: Number(salary),
-      location,
+      experienceLevel: experienceLevel.trim(),
+      salary: salaryValue,
+      location: location.trim(),
       jobType,
-      position,
+      position: position.trim(),
       company,
       createdUser: req.id
     });
 
-    return res.status(201).json({
-      message: "Job posted successfully",
-      job,
-      success: true
-    });
+    return successResponse(res, 201, "Job posted successfully", { job });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
-      message: "Something went wrong",
-      success: false
-    });
+    return errorResponse(res, 500, "Something went wrong");
   }
 }
 
@@ -66,86 +97,65 @@ async function getAllJobs(req, res) {
   try {
     const keyword = req.query.keyword || "";
 
-    const query = {
-      $or: [
-        { title: { $regex: keyword, $options: "i" } },
-        { description: { $regex: keyword, $options: "i" } }
-      ]
-    };
+    const query = keyword
+      ? {
+          $or: [
+            { title: { $regex: keyword, $options: "i" } },
+            { description: { $regex: keyword, $options: "i" } },
+            { location: { $regex: keyword, $options: "i" } }
+          ]
+        }
+      : {};
 
     const jobs = await Job.find(query)
       .populate("company")
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({
-      jobs,
-      success: true
-    });
+    return successResponse(res, 200, "Jobs fetched successfully", { jobs });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
-      message: "Something went wrong",
-      success: false
-    });
+    return errorResponse(res, 500, "Something went wrong");
   }
 }
 
 async function getJobId(req, res) {
   try {
-    const jobId = req.params.id;
-
-    const job = await Job.findById(jobId).populate("company");
+    const job = await Job.findById(req.params.id).populate("company");
 
     if (!job) {
-      return res.status(404).json({
-        message: "Job not found",
-        success: false
-      });
+      return errorResponse(res, 404, "Job not found");
     }
 
-    return res.status(200).json({
-      job,
-      success: true
-    });
+    return successResponse(res, 200, "Job fetched successfully", { job });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
-      message: "Something went wrong",
-      success: false
-    });
+    return errorResponse(res, 500, "Something went wrong");
   }
 }
 
 async function getAdminJob(req, res) {
   try {
-    const adminId = req.id;
+    if (!requireRecruiter(req, res)) return;
 
-    const jobs = await Job.find({ createdUser: adminId })
+    const jobs = await Job.find({ createdUser: req.id })
       .populate("company")
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({
-      jobs,
-      success: true
-    });
+    return successResponse(res, 200, "Recruiter jobs fetched successfully", { jobs });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
-      message: "Something went wrong",
-      success: false
-    });
+    return errorResponse(res, 500, "Something went wrong");
   }
 }
 
 async function closeJob(req, res) {
   try {
-    const jobId = req.params.id;
-    const recruiterId = req.id;
+    if (!requireRecruiter(req, res)) return;
 
     const job = await Job.findOneAndUpdate(
       {
-        _id: jobId,
-        createdUser: recruiterId
+        _id: req.params.id,
+        createdUser: req.id
       },
       {
         status: "closed"
@@ -156,23 +166,13 @@ async function closeJob(req, res) {
     );
 
     if (!job) {
-      return res.status(404).json({
-        message: "Job not found or unauthorized",
-        success: false
-      });
+      return errorResponse(res, 404, "Job not found or unauthorized");
     }
 
-    return res.status(200).json({
-      message: "Job closed successfully",
-      success: true,
-      job
-    });
+    return successResponse(res, 200, "Job closed successfully", { job });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
-      message: "Something went wrong",
-      success: false
-    });
+    return errorResponse(res, 500, "Something went wrong");
   }
 }
 

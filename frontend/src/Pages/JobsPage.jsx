@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "../style/JobsPage.css";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function JobsPage() {
@@ -11,6 +12,7 @@ export default function JobsPage() {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [applyingId, setApplyingId] = useState("");
 
   useEffect(() => {
     fetchJobs();
@@ -19,6 +21,7 @@ export default function JobsPage() {
   async function fetchJobs() {
     try {
       setLoading(true);
+      setError("");
 
       const response = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/api/job/get`,
@@ -28,7 +31,7 @@ export default function JobsPage() {
       setJobs(response.data.jobs || []);
     } catch (err) {
       console.log(err);
-      setError("Failed to fetch jobs");
+      setError(err.response?.data?.message || "Failed to fetch jobs");
     } finally {
       setLoading(false);
     }
@@ -36,8 +39,10 @@ export default function JobsPage() {
 
   async function handleApply(jobId) {
     try {
-      const response = await axios.get(
+      setApplyingId(jobId);
+      const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/api/application/apply/${jobId}`,
+        {},
         { withCredentials: true }
       );
 
@@ -45,6 +50,8 @@ export default function JobsPage() {
     } catch (err) {
       console.log(err);
       toast.error(err.response?.data?.message || "Failed to apply");
+    } finally {
+      setApplyingId("");
     }
   }
 
@@ -107,12 +114,12 @@ export default function JobsPage() {
                 <div className="job-meta">
                   <span>{job.location || "No location"}</span>
                   <span>{job.jobType || "Not specified"}</span>
-                  <span>₹{job.salary || 0}</span>
+                  <span>Rs. {job.salary || 0}</span>
                 </div>
 
                 <p className="job-description">
                   {job.description?.length > 130
-                    ? job.description.slice(0, 130) + "..."
+                    ? `${job.description.slice(0, 130)}...`
                     : job.description}
                 </p>
 
@@ -134,7 +141,11 @@ export default function JobsPage() {
                   </div>
                 </div>
 
-                <div className="job-actions">
+                <div className="job-actions split-actions">
+                  <Link to={`/jobs/${job._id}`} className="job-btn details-btn">
+                    View Details
+                  </Link>
+
                   {user?.role === "student" ? (
                     job.status === "closed" ? (
                       <button className="job-btn closed-btn" disabled>
@@ -143,9 +154,10 @@ export default function JobsPage() {
                     ) : (
                       <button
                         className="job-btn apply-btn"
+                        disabled={applyingId === job._id}
                         onClick={() => handleApply(job._id)}
                       >
-                        Apply Job
+                        {applyingId === job._id ? "Applying..." : "Apply Job"}
                       </button>
                     )
                   ) : (

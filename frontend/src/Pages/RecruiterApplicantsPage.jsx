@@ -20,7 +20,9 @@ export default function RecruiterApplicantsPage() {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_SERVER_URL}/api/application/${jobId}/applicants`,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
 
       setJob(response.data.job);
@@ -35,13 +37,16 @@ export default function RecruiterApplicantsPage() {
     try {
       setLoadingId(applicationId);
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/api/application/status/${applicationId}/update`,
+      const response = await axios.patch(
+        `${import.meta.env.VITE_SERVER_URL}/api/application/status/${applicationId}`,
         { status },
-        { withCredentials: true }
+        {
+          withCredentials: true,
+        }
       );
 
       toast.success(response.data.message || "Status updated successfully");
+
       fetchApplicants();
     } catch (err) {
       console.log(err);
@@ -51,14 +56,35 @@ export default function RecruiterApplicantsPage() {
     }
   }
 
+  async function downloadResume(userId) {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/api/user/resume/${userId}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      window.open(response.data.url, "_blank");
+    } catch (err) {
+      console.log(err);
+      toast.error(
+        err.response?.data?.message || "Unable to download resume"
+      );
+    }
+  }
+
   return (
     <section className="recruiter-applicants-page">
       <div className="recruiter-applicants-container">
         <div className="applicants-header">
           <h1>Applicants</h1>
+
           <p>
             {job
-              ? `Applicants for ${job.title} at ${job.company?.companyName || "Company"}`
+              ? `Applicants for ${job.title} at ${
+                  job.company?.companyName || "Company"
+                }`
               : "Loading applicants..."}
           </p>
         </div>
@@ -82,7 +108,9 @@ export default function RecruiterApplicantsPage() {
                     <div>
                       <h2>{applicant?.name}</h2>
                       <p className="applicant-email">{applicant?.email}</p>
-                      <p className="applicant-phone">{applicant?.phoneNumber}</p>
+                      <p className="applicant-phone">
+                        {applicant?.phoneNumber}
+                      </p>
                     </div>
 
                     <span className={`application-status ${currentStatus}`}>
@@ -97,6 +125,7 @@ export default function RecruiterApplicantsPage() {
 
                   <div className="applicant-section">
                     <h4>Skills</h4>
+
                     <div className="skills-wrap">
                       {applicant?.profile?.skills?.length > 0 ? (
                         applicant.profile.skills.map((skill, index) => (
@@ -112,15 +141,15 @@ export default function RecruiterApplicantsPage() {
 
                   <div className="applicant-section">
                     <h4>Resume</h4>
+
                     {applicant?.profile?.resume ? (
-                      <a
-                        href={applicant.profile.resume}
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
                         className="resume-link"
+                        onClick={() => downloadResume(applicant._id)}
                       >
-                        {applicant.profile.resumeOriginalName || "View Resume"}
-                      </a>
+                        {applicant.profile.resumeOriginalName ||
+                          "Download Resume"}
+                      </button>
                     ) : (
                       <p>No resume uploaded</p>
                     )}
@@ -134,7 +163,9 @@ export default function RecruiterApplicantsPage() {
                         handleStatusUpdate(application._id, "accepted")
                       }
                     >
-                      {loadingId === application._id ? "Updating..." : "Accept"}
+                      {loadingId === application._id
+                        ? "Updating..."
+                        : "Accept"}
                     </button>
 
                     <button
@@ -144,7 +175,9 @@ export default function RecruiterApplicantsPage() {
                         handleStatusUpdate(application._id, "rejected")
                       }
                     >
-                      {loadingId === application._id ? "Updating..." : "Reject"}
+                      {loadingId === application._id
+                        ? "Updating..."
+                        : "Reject"}
                     </button>
                   </div>
                 </div>

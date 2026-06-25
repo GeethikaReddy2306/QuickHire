@@ -19,28 +19,15 @@ export default function RecruiterDashboard() {
   async function fetchDashboardData() {
     try {
       const jobsRes = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/api/job/getadminJobs`,
+        `${import.meta.env.VITE_SERVER_URL}/api/job/admin`,
         { withCredentials: true }
       );
 
       const jobs = jobsRes.data.jobs || [];
-
       setJobCount(jobs.length);
-
-      let totalApplicants = 0;
-      let totalOpenJobs = 0;
-      let totalClosedJobs = 0;
-
-      jobs.forEach((job) => {
-        totalApplicants += job.applications?.length || 0;
-
-        if (job.status === "open") totalOpenJobs += 1;
-        if (job.status === "closed") totalClosedJobs += 1;
-      });
-
-      setApplicantCount(totalApplicants);
-      setOpenJobs(totalOpenJobs);
-      setClosedJobs(totalClosedJobs);
+      setApplicantCount(jobs.reduce((total, job) => total + (job.applications?.length || 0), 0));
+      setOpenJobs(jobs.filter((job) => job.status === "open").length);
+      setClosedJobs(jobs.filter((job) => job.status === "closed").length);
     } catch (error) {
       console.log("Dashboard fetch error:", error);
     }
@@ -49,11 +36,10 @@ export default function RecruiterDashboard() {
   return (
     <section className="recruiter-dashboard">
       <div className="dashboard-container">
-        {/* Hero Section */}
         <div className="dashboard-hero">
           <div className="hero-left">
             <p className="dashboard-badge">Recruiter Workspace</p>
-            <h1>Welcome back, {user?.name || "Recruiter"} 👋</h1>
+            <h1>Welcome back, {user?.name || "Recruiter"}</h1>
             <p>
               Manage your jobs, track applicants, and keep hiring organized from
               one place.
@@ -81,10 +67,9 @@ export default function RecruiterDashboard() {
           </div>
         </div>
 
-        {/* Stats Section */}
         <div className="stats-grid">
           <div className="stat-card green-card">
-            <div className="stat-icon">💼</div>
+            <div className="stat-icon">Jobs</div>
             <div>
               <h2>{jobCount}</h2>
               <p>Total Jobs</p>
@@ -92,7 +77,7 @@ export default function RecruiterDashboard() {
           </div>
 
           <div className="stat-card blue-card">
-            <div className="stat-icon">🟢</div>
+            <div className="stat-icon">Open</div>
             <div>
               <h2>{openJobs}</h2>
               <p>Open Jobs</p>
@@ -100,7 +85,7 @@ export default function RecruiterDashboard() {
           </div>
 
           <div className="stat-card orange-card">
-            <div className="stat-icon">🔒</div>
+            <div className="stat-icon">Closed</div>
             <div>
               <h2>{closedJobs}</h2>
               <p>Closed Jobs</p>
@@ -108,7 +93,7 @@ export default function RecruiterDashboard() {
           </div>
 
           <div className="stat-card purple-card">
-            <div className="stat-icon">👥</div>
+            <div className="stat-icon">People</div>
             <div>
               <h2>{applicantCount}</h2>
               <p>Total Applicants</p>
@@ -116,24 +101,23 @@ export default function RecruiterDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="quick-actions">
           <h2>Quick Actions</h2>
           <div className="quick-actions-grid">
             <Link to="/recruiter/job/create" className="action-card">
-              <div className="action-icon">➕</div>
+              <div className="action-icon">Post</div>
               <h3>Post Job</h3>
               <p>Create and publish a new job opening.</p>
             </Link>
 
             <Link to="/recruiter/jobs" className="action-card">
-              <div className="action-icon">📋</div>
+              <div className="action-icon">Jobs</div>
               <h3>My Jobs</h3>
               <p>View all jobs you posted and close them if needed.</p>
             </Link>
 
             <Link to="/recruiter/companies" className="action-card">
-              <div className="action-icon">🏢</div>
+              <div className="action-icon">Co.</div>
               <h3>Companies</h3>
               <p>Manage company profiles used for job postings.</p>
             </Link>

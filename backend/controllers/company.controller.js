@@ -1,103 +1,89 @@
 const Company = require("../models/company.model");
+const { successResponse, errorResponse } = require("../utils/response");
 
-// Register Company
+function requireRecruiter(req, res) {
+  if (req.role !== "recruiter") {
+    errorResponse(res, 403, "Only recruiters can access this resource");
+    return false;
+  }
+
+  return true;
+}
+
 async function registerCompany(req, res) {
   try {
+    if (!requireRecruiter(req, res)) return;
+
     const { companyName, description, website, location, logo } = req.body;
 
-    if (!companyName) {
-      return res.status(400).json({
-        message: "Company name is required",
-        success: false
-      });
+    if (!companyName?.trim()) {
+      return errorResponse(res, 400, "Company name is required");
     }
 
     const existingCompany = await Company.findOne({
-      companyName,
+      companyName: companyName.trim(),
       userId: req.id
     });
 
     if (existingCompany) {
-      return res.status(400).json({
-        message: "You already registered this company",
-        success: false
-      });
+      return errorResponse(res, 409, "You already registered this company");
     }
 
     const company = await Company.create({
-      companyName,
-      description: description || "",
-      website: website || "",
-      location: location || "",
-      logo: logo || "",
+      companyName: companyName.trim(),
+      description: description?.trim() || "",
+      website: website?.trim() || "",
+      location: location?.trim() || "",
+      logo: logo?.trim() || "",
       userId: req.id
     });
 
-    return res.status(201).json({
-      message: "Company registered successfully",
-      company,
-      success: true
-    });
+    return successResponse(res, 201, "Company registered successfully", { company });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
-      message: "Something went wrong",
-      success: false
-    });
+    return errorResponse(res, 500, "Something went wrong");
   }
 }
 
-// Get all companies of logged-in recruiter
 async function getCompany(req, res) {
   try {
+    if (!requireRecruiter(req, res)) return;
+
     const companies = await Company.find({ userId: req.id }).sort({
       createdAt: -1
     });
 
-    return res.status(200).json({
-      companies,
-      success: true
-    });
+    return successResponse(res, 200, "Companies fetched successfully", { companies });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
-      message: "Something went wrong",
-      success: false
-    });
+    return errorResponse(res, 500, "Something went wrong");
   }
 }
 
-// Get single company by id
 async function getCompanyId(req, res) {
   try {
+    if (!requireRecruiter(req, res)) return;
+
     const company = await Company.findOne({
       _id: req.params.id,
       userId: req.id
     });
 
     if (!company) {
-      return res.status(404).json({
-        message: "Company not found",
-        success: false
-      });
+      return errorResponse(res, 404, "Company not found");
     }
 
-    return res.status(200).json({
-      company,
-      success: true
-    });
+    return successResponse(res, 200, "Company fetched successfully", { company });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
-      message: "Something went wrong",
-      success: false
-    });
+    return errorResponse(res, 500, "Something went wrong");
   }
 }
 
-// Update company
 async function updateCompany(req, res) {
   try {
+    if (!requireRecruiter(req, res)) return;
+
     const { companyName, description, website, location, logo } = req.body;
     const companyId = req.params.id;
 
@@ -107,31 +93,30 @@ async function updateCompany(req, res) {
     });
 
     if (!company) {
-      return res.status(404).json({
-        message: "Company not found or unauthorized",
-        success: false
-      });
+      return errorResponse(res, 404, "Company not found or unauthorized");
     }
 
-    if (companyName !== undefined) company.companyName = companyName;
-    if (description !== undefined) company.description = description;
-    if (website !== undefined) company.website = website;
-    if (location !== undefined) company.location = location;
-    if (logo !== undefined) company.logo = logo;
+    if (companyName !== undefined) {
+      if (!companyName.trim()) {
+        return errorResponse(res, 400, "Company name is required");
+      }
+      company.companyName = companyName.trim();
+    }
+
+    if (description !== undefined) company.description = description.trim();
+    if (website !== undefined) company.website = website.trim();
+    if (location !== undefined) company.location = location.trim();
+    if (logo !== undefined) company.logo = logo.trim();
 
     await company.save();
 
-    return res.status(200).json({
-      message: "Company updated successfully",
-      company,
-      success: true
-    });
+    return successResponse(res, 200, "Company updated successfully", { company });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({
-      message: "Something went wrong",
-      success: false
-    });
+    if (err.code === 11000) {
+      return errorResponse(res, 409, "You already registered this company");
+    }
+    return errorResponse(res, 500, "Something went wrong");
   }
 }
 

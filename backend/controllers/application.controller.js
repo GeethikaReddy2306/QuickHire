@@ -1,188 +1,145 @@
-const Application = require('../models/application.model');
-const Job = require('../models/job.model');
+const Application = require("../models/application.model");
+const Job = require("../models/job.model");
+const { successResponse, errorResponse } = require("../utils/response");
+
+function requireRole(req, res, role, message) {
+  if (req.role !== role) {
+    errorResponse(res, 403, message);
+    return false;
+  }
+
+  return true;
+}
 
 async function applyJob(req, res) {
-    try {
-        const userId = req.id;
-        const jobId = req.params.id;
+  try {
+    if (!requireRole(req, res, "student", "Only students can apply for jobs")) return;
 
-        if (!jobId) {
-            return res.status(400).json({
-                message: "Job id is required",
-                success: false
-            });
-        }
+    const userId = req.id;
+    const jobId = req.params.id;
 
-        const existingApplication = await Application.findOne({
-            job: jobId,
-            applicant: userId
-        });
-
-        if (existingApplication) {
-            return res.status(400).json({
-                message: "You have already applied for this job",
-                success: false
-            });
-        }
-
-        const job = await Job.findById(jobId);
-
-        if (!job) {
-            return res.status(404).json({
-                message: "Job not found",
-                success: false
-            });
-        }
-
-        if (job.status === "closed") {
-            return res.status(400).json({
-                message: "This job is closed. Applications are no longer accepted.",
-                success: false
-            });
-        }
-
-        const newApplication = await Application.create({
-            job: jobId,
-            applicant: userId
-        });
-
-        job.applications.push(newApplication._id);
-        await job.save();
-
-        return res.status(201).json({
-            message: "Job applied successfully",
-            success: true
-        });
-
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json({
-            message: "Something went wrong",
-            success: false
-        });
+    if (!jobId) {
+      return errorResponse(res, 400, "Job id is required");
     }
+
+    const job = await Job.findById(jobId);
+
+    if (!job) {
+      return errorResponse(res, 404, "Job not found");
+    }
+
+    if (job.status === "closed") {
+      return errorResponse(res, 400, "This job is closed. Applications are no longer accepted.");
+    }
+
+    const existingApplication = await Application.findOne({
+      job: jobId,
+      applicant: userId
+    });
+
+    if (existingApplication) {
+      return errorResponse(res, 409, "You have already applied for this job");
+    }
+
+    const application = await Application.create({
+      job: jobId,
+      applicant: userId
+    });
+
+    job.applications.push(application._id);
+    await job.save();
+
+    return successResponse(res, 201, "Job applied successfully", { application });
+  } catch (err) {
+    console.log(err);
+    return errorResponse(res, 500, "Something went wrong");
+  }
 }
 
 async function getAppliedJob(req, res) {
-    try {
-        const userId = req.id;
+  try {
+    if (!requireRole(req, res, "student", "Only students can view applied jobs")) return;
 
-        const application = await Application.find({
-            applicant: userId
-        })
-            .sort({ createdAt: -1 })
-            .populate({
-                path: "job",
-                populate: {
-                    path: "company"
-                }
-            });
-
-        if (application.length === 0) {
-            return res.status(404).json({
-                message: "No Applications Found",
-                success: false
-            });
+    const application = await Application.find({ applicant: req.id })
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "job",
+        populate: {
+          path: "company"
         }
+      });
 
-        return res.status(200).json({
-            application,
-            success: true
-        });
-
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json({
-            message: "Something went wrong",
-            success: false
-        });
-    }
+    return successResponse(res, 200, "Applied jobs fetched successfully", { application });
+  } catch (err) {
+    console.log(err);
+    return errorResponse(res, 500, "Something went wrong");
+  }
 }
 
-// recruiter/admin checks applicants for a specific job
 async function getApplicants(req, res) {
-    try {
-        const jobId = req.params.id;
+  try {
+    if (!requireRole(req, res, "recruiter", "Only recruiters can view applicants")) return;
 
-        const job = await Job.findById(jobId)
-            .populate("company")
-            .populate({
-                path: "applications",
-                options: {
-                    sort: { createdAt: -1 }
-                },
-                populate: {
-                    path: "applicant",
-                    select: "name email phoneNumber role profile"
-                }
-            });
-
-        if (!job) {
-            return res.status(404).json({
-                message: "Job not found",
-                success: false
-            });
+    const job = await Job.findOne({ _id: req.params.id, createdUser: req.id })
+      .populate("company")
+      .populate({
+        path: "applications",
+        options: {
+          sort: { createdAt: -1 }
+        },
+        populate: {
+          path: "applicant",
+          select: "name email phoneNumber role profile"
         }
+      });
 
-        return res.status(200).json({
-            job,
-            success: true
-        });
-
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json({
-            message: "Something went wrong",
-            success: false
-        });
+    if (!job) {
+      return errorResponse(res, 404, "Job not found or unauthorized");
     }
+
+    return successResponse(res, 200, "Applicants fetched successfully", { job });
+  } catch (err) {
+    console.log(err);
+    return errorResponse(res, 500, "Something went wrong");
+  }
 }
 
 async function updateStatus(req, res) {
-    try {
-        const { status } = req.body;
-        const applicationId = req.params.id;
+  try {
+    if (!requireRole(req, res, "recruiter", "Only recruiters can update application status")) return;
 
-        if (!status) {
-            return res.status(400).json({
-                message: "Status is required",
-                success: false
-            });
-        }
+    const { status } = req.body;
+    const applicationId = req.params.id;
 
-        const application = await Application.findById(applicationId);
-
-        if (!application) {
-            return res.status(404).json({
-                message: "Application not found",
-                success: false
-            });
-        }
-
-        const validStatus = ["pending", "accepted", "rejected"];
-
-        if (!validStatus.includes(status.toLowerCase())) {
-            return res.status(400).json({
-                message: "Invalid status",
-                success: false
-            });
-        }
-
-        application.status = status.toLowerCase();
-        await application.save();
-
-        return res.status(200).json({
-            message: "Status updated successfully",
-            success: true
-        });
-
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json({
-            message: "Something went wrong",
-            success: false
-        });
+    if (!status) {
+      return errorResponse(res, 400, "Status is required");
     }
+
+    const normalizedStatus = status.toLowerCase();
+    const validStatus = ["pending", "accepted", "rejected"];
+
+    if (!validStatus.includes(normalizedStatus)) {
+      return errorResponse(res, 400, "Invalid status");
+    }
+
+    const application = await Application.findById(applicationId).populate("job");
+
+    if (!application) {
+      return errorResponse(res, 404, "Application not found");
+    }
+
+    if (String(application.job.createdUser) !== String(req.id)) {
+      return errorResponse(res, 403, "You are not authorized to update this application");
+    }
+
+    application.status = normalizedStatus;
+    await application.save();
+
+    return successResponse(res, 200, "Status updated successfully", { application });
+  } catch (err) {
+    console.log(err);
+    return errorResponse(res, 500, "Something went wrong");
+  }
 }
 
 module.exports = { applyJob, getAppliedJob, updateStatus, getApplicants };

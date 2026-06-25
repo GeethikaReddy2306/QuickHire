@@ -1,36 +1,26 @@
 const jwt = require("jsonwebtoken");
+const { errorResponse } = require("../utils/response");
+
 async function isAuthenticated(req, res, next) {
-    try {
-        const token = req.cookies.token;
+  try {
+    const token = req.cookies.token;
 
-        if (!token) {
-            return res.status(401).json({
-                message: "User unauthorized",
-                success: false
-            });
-        }
-
-        const decode = jwt.verify(
-            token,
-            process.env.JWT_SECRET
-        );
-
-        if (!decode) {
-            return res.status(401).json({
-                message: "Invalid token",
-                success: false
-            });
-        }
-
-        req.id = decode.userId;
-        next();
-
-    } catch (error) {
-        return res.status(401).json({
-            message: "Token expired or invalid",
-            success: false
-        });
+    if (!token) {
+      return errorResponse(res, 401, "User unauthorized");
     }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded?.userId) {
+      return errorResponse(res, 401, "Invalid token");
+    }
+
+    req.id = decoded.userId;
+    req.role = decoded.role;
+    next();
+  } catch (error) {
+    return errorResponse(res, 401, "Token expired or invalid");
+  }
 }
 
 module.exports = isAuthenticated;
