@@ -10,7 +10,7 @@ export default function LoginPage() {
   const[password,setPassword]=useState('');
   const[role,setRole]=useState('');
   const[error,setError]=useState('');
-  const { setUser } = useAuth();
+  const { updateUser } = useAuth();
 const navigate = useNavigate();
   async function HandleLogin(e){
     e.preventDefault();
@@ -32,8 +32,7 @@ const navigate = useNavigate();
 );
        console.log(response.data);
 
-setUser(response.data.user);
-       localStorage.setItem("quickhireUser", JSON.stringify(response.data.user));
+updateUser(response.data.user);
        setEmail('');
        setPassword('');
        setRole('');

@@ -12,6 +12,12 @@ function initials(name = "U") {
     .toUpperCase();
 }
 
+function photoSrc(url, cacheBust) {
+  if (!url) return "";
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}cb=${cacheBust || Date.now()}`;
+}
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -20,6 +26,11 @@ export default function Navbar() {
 
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    console.log("[Navbar] user.profile.photo:", user?.profile?.photo);
+    console.log("[Navbar] photo src:", photoSrc(user?.profile?.photo, user?._photoCacheBust));
+  }, [user]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -48,6 +59,8 @@ export default function Navbar() {
     closeMenu();
     navigate("/login");
   }
+
+  const avatarSrc = photoSrc(user?.profile?.photo, user?._photoCacheBust);
 
   return (
     <nav id="navbar">
@@ -158,7 +171,8 @@ export default function Navbar() {
               >
                 {user?.profile?.photo ? (
                   <img
-                    src={user.profile.photo}
+                    key={avatarSrc}
+                    src={avatarSrc}
                     alt={user.name}
                   />
                 ) : (
@@ -167,15 +181,14 @@ export default function Navbar() {
               </button>
 
               <div
-                className={`profile-dropdown ${
-                  profileOpen ? "show" : ""
-                }`}
+                className={`profile-dropdown ${profileOpen ? "show" : ""}`}
               >
                 <div className="dropdown-user">
                   <div className="dropdown-photo">
                     {user?.profile?.photo ? (
                       <img
-                        src={user.profile.photo}
+                        key={`dropdown-${avatarSrc}`}
+                        src={avatarSrc}
                         alt={user.name}
                       />
                     ) : (

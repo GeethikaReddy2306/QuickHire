@@ -9,13 +9,21 @@ const { successResponse, errorResponse } = require("../utils/response");
 const allowedRoles = ["student", "recruiter"];
 
 function buildUserPayload(user) {
+  const doc = user?.toObject ? user.toObject() : user;
+
   return {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    phoneNumber: user.phoneNumber,
-    role: user.role,
-    profile: user.profile
+    _id: doc._id,
+    name: doc.name,
+    email: doc.email,
+    phoneNumber: doc.phoneNumber,
+    role: doc.role,
+    profile: {
+      bio: doc.profile?.bio || "",
+      skills: doc.profile?.skills || [],
+      resume: doc.profile?.resume || "",
+      resumeOriginalName: doc.profile?.resumeOriginalName || "",
+      photo: doc.profile?.photo || ""
+    }
   };
 }
 
@@ -166,11 +174,19 @@ async function updateProfile(req, res) {
     const { name, email, phoneNumber, bio, skills } = req.body;
     const userId = req.id;
 
+    console.log("[updateProfile] request body:", req.body);
+    console.log("[updateProfile] uploaded files:", {
+      resume: req.files?.resume?.[0]?.originalname,
+      photo: req.files?.photo?.[0]?.originalname
+    });
+
     const user = await User.findById(userId);
 
     if (!user) {
       return errorResponse(res, 404, "User not found");
     }
+
+    console.log("[updateProfile] MongoDB photo before save:", user.profile?.photo);
 
     if (email && email.toLowerCase().trim() !== user.email) {
       const existingEmail = await User.findOne({
@@ -207,25 +223,30 @@ async function updateProfile(req, res) {
       const uploadedResume = await uploadToS3(resumeFile, userId, "resumes");
       user.profile.resume = uploadedResume.url;
       user.profile.resumeOriginalName = uploadedResume.originalName;
+      user.markModified("profile");
     }
 
     if (photoFile) {
       const uploadedPhoto = await uploadToS3(photoFile, userId, "profile-photos");
+      console.log("[updateProfile] S3 photo URL:", uploadedPhoto.url);
       user.profile.photo = uploadedPhoto.url;
+      user.markModified("profile");
+    }
+
+    if (bio !== undefined || skills !== undefined) {
+      user.markModified("profile");
     }
 
     await user.save();
 
-const updatedUser = await User.findById(userId);
+    console.log("[updateProfile] MongoDB photo after save:", user.profile?.photo);
 
-return successResponse(
-    res,
-    200,
-    "Profile updated successfully",
-    {
-        user: buildUserPayload(updatedUser)
-    }
-);
+    const responseUser = buildUserPayload(user);
+    console.log("[updateProfile] API response user photo:", responseUser.profile?.photo);
+
+    return successResponse(res, 200, "Profile updated successfully", {
+      user: responseUser
+    });
   } catch (err) {
     console.log(err);
 
