@@ -12,16 +12,10 @@ export default function AccessDeniedPage() {
 
         <h1>Access Denied</h1>
 
-        <p>
-          This page is available only for authenticated users.
-          <br />
-          Please login to continue using <strong>QuickHire</strong>.
-        </p>
+        
 
         <div className="access-buttons">
-          <Link to="/login" className="login-btn">
-            Login
-          </Link>
+          
 
           <Link to="/" className="home-btn">
             Go Home

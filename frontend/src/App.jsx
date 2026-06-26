@@ -10,7 +10,7 @@ import LoginPage from "./Pages/LoginPage";
 import ProfilePage from "./Pages/ProfilePage";
 import JobDetailsPage from "./Pages/JobDetailsPage";
 import AppliedJobsPage from "./Pages/AppliedJobsPage";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 import RecruiterDashboard from "./Pages/RecruiterDashboard";
 import CreateJobPage from "./Pages/CreateJobPage";
 import RecruiterJobsPage from "./Pages/RecruiterJobsPage";
@@ -44,14 +44,14 @@ export default function App() {
         <Route path="/access-denied" element={<AccessDeniedPage />} />
 
         {/* Student Routes */}
-        <Route
-          path="/profile"
-          element={
-            <StudentProtectedRoute>
-              <ProfilePage />
-            </StudentProtectedRoute>
-          }
-        />
+       <Route
+  path="/profile"
+  element={
+    <ProtectedRoute>
+      <ProfilePage />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/applied-jobs"

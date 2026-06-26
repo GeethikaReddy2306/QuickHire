@@ -105,28 +105,22 @@ export default function FeaturedJobs() {
             )}
 
             {/* Secondary Button */}
-            {!isAuthenticated ? (
-              <button
-                className="featured-card-btn secondary-btn"
-                onClick={() => navigate("/login")}
-              >
-                Login to Apply
-              </button>
-            ) : user?.role === "student" ? (
-              <Link
-                to={`/jobs/${job._id}`}
-                className="featured-card-btn secondary-btn"
-              >
-                Apply Now
-              </Link>
-            ) : (
-              <Link
-                to={`/jobs/${job._id}`}
-                className="featured-card-btn secondary-btn"
-              >
-                View Details
-              </Link>
-            )}
+            {/* Secondary Button */}
+{!isAuthenticated ? (
+  <button
+    className="featured-card-btn secondary-btn"
+    onClick={() => navigate("/login")}
+  >
+    Login to Apply
+  </button>
+) : user?.role === "student" ? (
+  <Link
+    to={`/jobs/${job._id}`}
+    className="featured-card-btn secondary-btn"
+  >
+    Apply Now
+  </Link>
+) : null}
           </div>
         ))}
       </div>
