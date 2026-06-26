@@ -216,9 +216,16 @@ async function updateProfile(req, res) {
 
     await user.save();
 
-    return successResponse(res, 200, "Profile updated successfully", {
-      user: buildUserPayload(user)
-    });
+const updatedUser = await User.findById(userId);
+
+return successResponse(
+    res,
+    200,
+    "Profile updated successfully",
+    {
+        user: buildUserPayload(updatedUser)
+    }
+);
   } catch (err) {
     console.log(err);
 

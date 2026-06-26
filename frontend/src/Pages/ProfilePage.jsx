@@ -1,6 +1,6 @@
 import "../style/ProfilePage.css";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -15,19 +15,32 @@ function initials(name = "U") {
 
 export default function ProfilePage() {
   const { user, setUser } = useAuth();
+
   const [isEditing, setIsEditing] = useState(false);
 
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || "");
-  const [bio, setBio] = useState(user?.profile?.bio || "");
-  const [skills, setSkills] = useState(user?.profile?.skills?.join(", ") || "");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [bio, setBio] = useState("");
+  const [skills, setSkills] = useState("");
+
   const [resumeFile, setResumeFile] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(user?.profile?.photo || "");
+  const [photoPreview, setPhotoPreview] = useState("");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+
+    setName(user.name || "");
+    setEmail(user.email || "");
+    setPhoneNumber(String(user.phoneNumber || ""));
+    setBio(user.profile?.bio || "");
+    setSkills(user.profile?.skills?.join(", ") || "");
+    setPhotoPreview(user.profile?.photo || "");
+  }, [user]);
 
   if (!user) {
     return (
@@ -41,18 +54,22 @@ export default function ProfilePage() {
   }
 
   function handlePhotoChange(file) {
-    setPhotoFile(file || null);
-    if (file) {
-      setPhotoPreview(URL.createObjectURL(file));
-    }
+    if (!file) return;
+
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
   }
 
   async function handleProfileUpdate(e) {
     e.preventDefault();
     setError("");
 
-    if (!name.trim() || !email.trim() || !phoneNumber.trim()) {
-      setError("Name, email and phone number are required");
+    if (
+      !name.trim() ||
+      !email.trim() ||
+      !String(phoneNumber).trim()
+    ) {
+      setError("Name, Email and Phone Number are required.");
       return;
     }
 
@@ -60,35 +77,58 @@ export default function ProfilePage() {
       setLoading(true);
 
       const formData = new FormData();
-      formData.append("name", name);
-      formData.append("email", email);
-      formData.append("phoneNumber", phoneNumber);
+
+      formData.append("name", name.trim());
+      formData.append("email", email.trim());
+      formData.append("phoneNumber", String(phoneNumber));
       formData.append("bio", bio);
       formData.append("skills", skills);
 
-      if (resumeFile) formData.append("resume", resumeFile);
-      if (photoFile) formData.append("photo", photoFile);
+      if (resumeFile) {
+        formData.append("resume", resumeFile);
+      }
 
-      const response = await axios.put(
-        `${import.meta.env.VITE_SERVER_URL}/api/user/profile/update`,
-        formData,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" }
-        }
+      if (photoFile) {
+        formData.append("photo", photoFile);
+      }
+
+    const { data } = await axios.put(
+  `${import.meta.env.VITE_SERVER_URL}/api/user/profile/update`,
+  formData,
+  { withCredentials: true }
+);
+
+console.log("Raw response:", data); // check this once in devtools, then remove
+
+const updatedUser = data.user || data.data?.user; // handles both shapes
+
+if (!updatedUser) {
+  throw new Error("Unexpected response shape — no user found");
+}
+
+setUser({ ...updatedUser });
+localStorage.setItem("quickhireUser", JSON.stringify(updatedUser));
+
+      setPhotoPreview(
+        updatedUser.profile?.photo
+          ? `${updatedUser.profile.photo}?t=${Date.now()}`
+          : ""
       );
 
-      toast.success(response.data.message || "Profile updated successfully");
-      setUser(response.data.user);
-      localStorage.setItem("quickhireUser", JSON.stringify(response.data.user));
-      setIsEditing(false);
       setResumeFile(null);
       setPhotoFile(null);
-      setPhotoPreview(response.data.user?.profile?.photo || "");
+      setError("");
+      setIsEditing(false);
+
+      toast.success(data.message);
     } catch (err) {
-      console.log(err);
-      setError(err.response?.data?.message || "Profile update failed");
-      toast.error(err.response?.data?.message || "Profile update failed");
+      console.error(err);
+
+      const message =
+        err.response?.data?.message || "Profile update failed";
+
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -96,140 +136,307 @@ export default function ProfilePage() {
 
   function handleCancelEdit() {
     setIsEditing(false);
-    setError("");
+
+    setName(user.name || "");
+    setEmail(user.email || "");
+    setPhoneNumber(String(user.phoneNumber || ""));
+    setBio(user.profile?.bio || "");
+    setSkills(user.profile?.skills?.join(", ") || "");
+
     setResumeFile(null);
     setPhotoFile(null);
-    setPhotoPreview(user?.profile?.photo || "");
-    setName(user?.name || "");
-    setEmail(user?.email || "");
-    setPhoneNumber(user?.phoneNumber || "");
-    setBio(user?.profile?.bio || "");
-    setSkills(user?.profile?.skills?.join(", ") || "");
-  }
 
+    setPhotoPreview(
+      user.profile?.photo
+        ? `${user.profile.photo}?t=${Date.now()}`
+        : ""
+    );
+
+    setError("");
+  }
   return (
-    <section className="profile-page">
-      <div className="profile-shell">
-        <aside className="profile-identity-card">
-          <div className="profile-photo-xl">
-            {user?.profile?.photo ? (
-              <img src={user.profile.photo} alt={`${user.name} profile`} />
-            ) : (
-              <span>{initials(user?.name)}</span>
-            )}
-          </div>
-          <h1>{user?.name}</h1>
-          <p>{user?.email}</p>
-          <span className="role-badge">{user?.role}</span>
-          <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>
+  <section className="profile-page">
+    <div className="profile-shell">
+
+      <aside className="profile-identity-card">
+        <div className="profile-photo-xl">
+          {photoPreview ? (
+            <img
+              key={photoPreview}
+              src={photoPreview}
+              alt={name}
+            />
+          ) : (
+            <span>{initials(name)}</span>
+          )}
+        </div>
+
+        <h1>{name}</h1>
+        <p>{email}</p>
+
+        <span className="role-badge">
+          {user.role}
+        </span>
+
+        {!isEditing && (
+          <button
+            className="edit-profile-btn"
+            onClick={() => setIsEditing(true)}
+          >
             Edit Profile
           </button>
-        </aside>
+        )}
+      </aside>
 
-        <main className="profile-content-card">
-          {!isEditing ? (
-            <>
-              <div className="profile-section-title">
-                <h2>Profile Overview</h2>
-                <p>Your public hiring profile and application documents.</p>
+      <main className="profile-content-card">
+
+        {!isEditing ? (
+          <>
+            <div className="profile-section-title">
+              <h2>Profile Overview</h2>
+              <p>
+                Your public hiring profile and application
+                documents.
+              </p>
+            </div>
+
+            <div className="profile-details-grid">
+
+              <div className="detail-box">
+                <span>Phone</span>
+                <strong>
+                  {user.phoneNumber || "Not added yet"}
+                </strong>
               </div>
 
-              <div className="profile-details-grid">
-                <div className="detail-box">
-                  <span>Phone</span>
-                  <strong>{user?.phoneNumber || "Not added yet"}</strong>
-                </div>
-                <div className="detail-box wide-box">
-                  <span>Bio</span>
-                  <p>{user?.profile?.bio || "No bio added yet"}</p>
-                </div>
-                <div className="detail-box wide-box">
-                  <span>Skills</span>
-                  {user?.profile?.skills?.length > 0 ? (
-                    <div className="skills-wrap">
-                      {user.profile.skills.map((skill, index) => (
-                        <span key={index} className="skill-chip">{skill}</span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p>No skills added yet</p>
-                  )}
-                </div>
-                <div className="detail-box wide-box">
-                  <span>Resume</span>
-                  {user?.profile?.resume ? (
-                    <a href={user.profile.resume} target="_blank" rel="noreferrer" className="resume-link">
-                      {user.profile.resumeOriginalName || "View Resume"}
-                    </a>
-                  ) : (
-                    <p>No resume uploaded yet</p>
-                  )}
-                </div>
-              </div>
-            </>
-          ) : (
-            <form className="profile-edit-form" onSubmit={handleProfileUpdate}>
-              <div className="profile-section-title">
-                <h2>Edit Profile</h2>
-                <p>Keep your profile current for recruiters and applications.</p>
+              <div className="detail-box wide-box">
+                <span>Bio</span>
+                <p>
+                  {user.profile?.bio ||
+                    "No bio added yet"}
+                </p>
               </div>
 
-              {error && <p className="error-message">{error}</p>}
+              <div className="detail-box wide-box">
+                <span>Skills</span>
 
-              <div className="photo-upload-row">
-                <div className="profile-photo-preview">
-                  {photoPreview ? <img src={photoPreview} alt="Profile preview" /> : <span>{initials(name)}</span>}
-                </div>
-                <label className="file-pill">
-                  Upload Profile Picture
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    onChange={(e) => handlePhotoChange(e.target.files?.[0])}
+                {user.profile?.skills?.length ? (
+                  <div className="skills-wrap">
+                    {user.profile.skills.map(
+                      (skill, index) => (
+                        <span
+                          key={index}
+                          className="skill-chip"
+                        >
+                          {skill}
+                        </span>
+                      )
+                    )}
+                  </div>
+                ) : (
+                  <p>No skills added yet</p>
+                )}
+              </div>
+
+              <div className="detail-box wide-box">
+                <span>Resume</span>
+
+                {user.profile?.resume ? (
+                  <button
+                    className="resume-link"
+                    onClick={async () => {
+                      try {
+                        const res = await axios.get(
+                          `${import.meta.env.VITE_SERVER_URL}/api/user/resume/${user._id}`,
+                          {
+                            withCredentials: true
+                          }
+                        );
+
+                        window.open(
+                          res.data.url,
+                          "_blank"
+                        );
+                      } catch {
+                        toast.error(
+                          "Unable to open resume"
+                        );
+                      }
+                    }}
+                  >
+                    {user.profile
+                      .resumeOriginalName ||
+                      "View Resume"}
+                  </button>
+                ) : (
+                  <p>No resume uploaded yet</p>
+                )}
+              </div>
+
+            </div>
+          </>
+        ) : (
+          <form
+            className="profile-edit-form"
+            onSubmit={handleProfileUpdate}
+          >
+            <div className="profile-section-title">
+              <h2>Edit Profile</h2>
+              <p>
+                Keep your profile updated for
+                recruiters.
+              </p>
+            </div>
+
+            {error && (
+              <p className="error-message">
+                {error}
+              </p>
+            )}
+
+            <div className="photo-upload-row">
+
+              <div className="profile-photo-preview">
+                {photoPreview ? (
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
                   />
+                ) : (
+                  <span>{initials(name)}</span>
+                )}
+              </div>
+
+              <label className="file-pill">
+                Upload Profile Picture
+
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) =>
+                    handlePhotoChange(
+                      e.target.files?.[0]
+                    )
+                  }
+                />
+              </label>
+
+            </div>
+
+            <div className="form-grid">
+
+              <div className="input-group">
+                <label>Full Name</label>
+
+                <input
+                  value={name}
+                  onChange={(e) =>
+                    setName(e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Email</label>
+
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Phone Number</label>
+
+                <input
+                  value={phoneNumber}
+                  onChange={(e) =>
+                    setPhoneNumber(
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Bio</label>
+
+                <textarea
+                  rows={4}
+                  value={bio}
+                  onChange={(e) =>
+                    setBio(e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="input-group full-width">
+                <label>Skills</label>
+
+                <input
+                  value={skills}
+                  onChange={(e) =>
+                    setSkills(e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="input-group full-width">
+                <label>
+                  Resume (PDF, DOC, DOCX)
                 </label>
+
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) =>
+                    setResumeFile(
+                      e.target.files?.[0]
+                    )
+                  }
+                />
+
+                <p className="file-hint">
+                  {resumeFile?.name ||
+                    user.profile
+                      ?.resumeOriginalName ||
+                    "No Resume Selected"}
+                </p>
               </div>
 
-              <div className="form-grid">
-                <div className="input-group">
-                  <label>Full Name</label>
-                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-                </div>
-                <div className="input-group">
-                  <label>Email</label>
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                </div>
-                <div className="input-group">
-                  <label>Phone Number</label>
-                  <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-                </div>
-                <div className="input-group">
-                  <label>Bio</label>
-                  <textarea rows="4" value={bio} onChange={(e) => setBio(e.target.value)} />
-                </div>
-                <div className="input-group full-width">
-                  <label>Skills</label>
-                  <input type="text" value={skills} onChange={(e) => setSkills(e.target.value)} />
-                </div>
-                <div className="input-group full-width">
-                  <label>Resume (PDF / DOC / DOCX)</label>
-                  <input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setResumeFile(e.target.files?.[0])} />
-                  <p className="file-hint">
-                    {resumeFile?.name || user?.profile?.resumeOriginalName || "No resume selected"}
-                  </p>
-                </div>
-              </div>
+            </div>
 
-              <div className="profile-actions">
-                <button type="button" className="cancel-btn" onClick={handleCancelEdit}>Cancel</button>
-                <button type="submit" className="edit-profile-btn" disabled={loading}>
-                  {loading ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            </form>
-          )}
-        </main>
-      </div>
-    </section>
-  );
+            <div className="profile-actions">
+
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                className="edit-profile-btn"
+                disabled={loading}
+              >
+                {loading
+                  ? "Saving..."
+                  : "Save Changes"}
+              </button>
+
+            </div>
+
+          </form>
+        )}
+
+      </main>
+
+    </div>
+  </section>
+);
 }
