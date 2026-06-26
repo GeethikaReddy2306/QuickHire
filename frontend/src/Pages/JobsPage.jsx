@@ -158,20 +158,30 @@ export default function JobsPage() {
                     View Details
                   </Link>
 
-                  {user?.role === "student" ? (
-                    <button
-                      className="job-btn apply-btn"
-                      disabled={applyingId === job._id}
-                      onClick={() => handleApply(job._id)}
-                      aria-label={`Apply to ${job.title}`}
-                    >
-                      {applyingId === job._id ? "Applying..." : "Apply Job"}
-                    </button>
-                  ) : (
-                    <button className="job-btn closed-btn" disabled>
-                      Recruiter View
-                    </button>
-                  )}
+                 {!user ? (
+  <Link
+    to="/login"
+    className="job-btn apply-btn"
+  >
+    Login to Apply
+  </Link>
+) : user.role === "student" ? (
+  <button
+    className="job-btn apply-btn"
+    disabled={applyingId === job._id}
+    onClick={() => handleApply(job._id)}
+    aria-label={`Apply to ${job.title}`}
+  >
+    {applyingId === job._id ? "Applying..." : "Apply Job"}
+  </button>
+) : (
+  <Link
+    to={`/jobs/${job._id}`}
+    className="job-btn details-btn"
+  >
+    View Details
+  </Link>
+)}
                 </div>
               </div>
             ))}

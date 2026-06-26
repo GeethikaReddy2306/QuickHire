@@ -81,3 +81,26 @@
     max-width: 100%;
   }
 }
+.footer-links a {
+  color: #f3f3f3;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.footer-links a:hover {
+  color: white;
+}
+
+.footer-link-btn {
+  background: transparent;
+  border: none;
+  color: #f3f3f3;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  transition: 0.3s;
+}
+
+.footer-link-btn:hover {
+  color: white;
+}

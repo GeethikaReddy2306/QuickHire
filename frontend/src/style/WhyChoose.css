@@ -1,86 +1,118 @@
 #why-choose {
-  width: 100%;
-  background-color: #f8f8f5;
-  padding: 70px 60px;
+  padding: 90px 20px;
+  background: #f6f7f4;
 }
 
-.why-heading {
+.why-header {
   text-align: center;
-  margin-bottom: 45px;
+  margin-bottom: 60px;
 }
 
-.why-heading h2 {
-  font-size: 2.4rem;
-  color: #222;
+.why-header h2 {
+  font-size: 48px;
+  color: #16213e;
   margin-bottom: 12px;
 }
 
-.why-heading p {
-  font-size: 1.05rem;
-  color: #666;
+.why-header p {
+  font-size: 18px;
+  color: #667085;
 }
 
-.why-container {
-  display: flex;
-  justify-content: center;
-  gap: 25px;
-  flex-wrap: wrap;
+/* Grid */
+
+.why-grid {
+  max-width: 1250px;
+  margin: auto;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
 }
+
+/* Card */
 
 .why-card {
-  width: 320px;
-  background-color: white;
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  background: white;
+  border-radius: 24px;
+  padding: 45px 35px;
+
   text-align: center;
-  transition: transform 0.3s ease;
+
+  box-shadow: 0 15px 35px rgba(0,0,0,.08);
+
+  transition: .3s;
 }
 
 .why-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 45px rgba(0,0,0,.12);
 }
 
+/* Icon */
+
 .why-icon {
-  font-size: 2.2rem;
-  margin-bottom: 18px;
+  width: 80px;
+  height: 80px;
+
+  margin: 0 auto 28px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 50%;
+
+  background: #eef4e8;
+  color: #87967a;
+
+  font-size: 34px;
+
+  transition: .3s;
+}
+
+.why-card:hover .why-icon {
+  background: #87967a;
+  color: white;
+  transform: rotate(8deg) scale(1.08);
 }
 
 .why-card h3 {
-  font-size: 1.4rem;
-  color: #222;
-  margin-bottom: 14px;
+  font-size: 32px;
+  color: #16213e;
+  margin-bottom: 20px;
 }
 
 .why-card p {
-  color: #666;
-  line-height: 1.7;
-  font-size: 1rem;
+  color: #667085;
+  line-height: 1.8;
+  font-size: 17px;
 }
 
 /* Tablet */
+
 @media (max-width: 992px) {
-  #why-choose {
-    padding: 55px 30px;
+
+  .why-grid {
+    grid-template-columns: repeat(2,1fr);
   }
 
-  .why-heading h2 {
-    font-size: 2rem;
-  }
 }
 
 /* Mobile */
-@media (max-width: 768px) {
-  #why-choose {
-    padding: 45px 20px;
+
+@media (max-width:768px){
+
+  .why-grid{
+    grid-template-columns:1fr;
   }
 
-  .why-heading h2 {
-    font-size: 1.8rem;
+  .why-header h2{
+    font-size:36px;
   }
 
-  .why-card {
-    width: 100%;
-    max-width: 350px;
+  .why-card{
+    padding:35px 25px;
   }
+
 }

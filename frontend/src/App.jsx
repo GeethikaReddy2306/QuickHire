@@ -18,7 +18,7 @@ import RecruiterApplicantsPage from "./Pages/RecruiterApplicantsPage";
 import RecruiterCompaniesPage from "./Pages/RecruiterCompaniesPage";
 import RecruiterCreateCompanyPage from "./Pages/RecruiterCreateCompanyPage";
 import RecruiterEditCompanyPage from "./Pages/RecruiterEditCompanyPage";
-
+import AccessDeniedPage from "./Pages/AccessDeniedPage";
 export default function App() {
   return (
     <div>
@@ -40,7 +40,8 @@ export default function App() {
         <Route path="/recruiter/companies" element={<RecruiterCompaniesPage />} />
         <Route path="/recruiter/company/create" element={<RecruiterCreateCompanyPage />} />
         <Route path="/recruiter/company/edit/:id" element={<RecruiterEditCompanyPage />} />
-      </Routes>
+        <Route path="/access-denied" element={<AccessDeniedPage />} />
+        </Routes>
 
       <ToastContainer />
       <Footer />

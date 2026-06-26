@@ -91,15 +91,33 @@ export default function JobDetailsPage() {
             <span className={`job-status ${job.status}`}>{job.status}</span>
             <strong>Rs. {job.salary}</strong>
             <p>Annual package or recruiter-stated compensation.</p>
-            {user?.role === "student" && job.status === "open" ? (
-              <button className="apply-detail-btn" onClick={handleApply} disabled={applying}>
-                {applying ? "Applying..." : "Apply Now"}
-              </button>
-            ) : (
-              <button className="apply-detail-btn disabled" disabled>
-                {job.status === "closed" ? "Job Closed" : "Recruiter View"}
-              </button>
-            )}
+           {!user ? (
+  <button
+    className="apply-detail-btn"
+    onClick={() => navigate("/login")}
+  >
+    Login to Apply
+  </button>
+) : user.role === "student" && job.status === "open" ? (
+  <button
+    className="apply-detail-btn"
+    onClick={handleApply}
+    disabled={applying}
+  >
+    {applying ? "Applying..." : "Apply Now"}
+  </button>
+) : user.role === "recruiter" ? (
+  <button
+    className="apply-detail-btn"
+    onClick={() => navigate("/recruiter/dashboard")}
+  >
+    Recruiter Dashboard
+  </button>
+) : (
+  <button className="apply-detail-btn disabled" disabled>
+    Job Closed
+  </button>
+)}
           </div>
         </div>
 

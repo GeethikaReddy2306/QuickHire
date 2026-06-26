@@ -155,31 +155,45 @@ export default function RecruiterApplicantsPage() {
                     )}
                   </div>
 
-                  <div className="applicant-actions">
-                    <button
-                      className="accept-btn"
-                      disabled={loadingId === application._id}
-                      onClick={() =>
-                        handleStatusUpdate(application._id, "accepted")
-                      }
-                    >
-                      {loadingId === application._id
-                        ? "Updating..."
-                        : "Accept"}
-                    </button>
+                  {currentStatus === "pending" ? (
+  <div className="applicant-actions">
+    <button
+      className="accept-btn"
+      disabled={loadingId === application._id}
+      onClick={() =>
+        handleStatusUpdate(application._id, "accepted")
+      }
+    >
+      {loadingId === application._id
+        ? "Updating..."
+        : "Accept"}
+    </button>
 
-                    <button
-                      className="reject-btn"
-                      disabled={loadingId === application._id}
-                      onClick={() =>
-                        handleStatusUpdate(application._id, "rejected")
-                      }
-                    >
-                      {loadingId === application._id
-                        ? "Updating..."
-                        : "Reject"}
-                    </button>
-                  </div>
+    <button
+      className="reject-btn"
+      disabled={loadingId === application._id}
+      onClick={() =>
+        handleStatusUpdate(application._id, "rejected")
+      }
+    >
+      {loadingId === application._id
+        ? "Updating..."
+        : "Reject"}
+    </button>
+  </div>
+) : (
+  <div
+    className={`status-box ${
+      currentStatus === "accepted"
+        ? "accepted-box"
+        : "rejected-box"
+    }`}
+  >
+    {currentStatus === "accepted"
+      ? "Applicant Accepted"
+      : "Applicant Rejected"}
+  </div>
+)}
                 </div>
               );
             })}
