@@ -7,7 +7,8 @@ const s3 = require("../utils/s3");
 const { successResponse, errorResponse } = require("../utils/response");
 
 const allowedRoles = ["student", "recruiter"];
-
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
 function buildUserPayload(user) {
   const doc = user?.toObject ? user.toObject() : user;
 
@@ -302,10 +303,149 @@ async function downloadResume(req, res) {
     return errorResponse(res, 500, "Unable to generate download link");
   }
 }
+async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return errorResponse(res, 400, "Email is required");
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+
+    if (!user) {
+      return errorResponse(res, 404, "No account found with this email");
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    user.resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    // expiry: 1 hour
+    user.resetPasswordExpires = Date.now() + 60 * 60 * 1000;
+
+    await user.save();
+
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;padding:20px">
+        <h2>Reset your QuickHire password</h2>
+
+        <p>Hello ${user.name},</p>
+
+        <p>Click the button below to reset your password.</p>
+
+        <a
+          href="${resetUrl}"
+          style="display:inline-block;padding:12px 22px;background:#2563eb;color:white;text-decoration:none;border-radius:6px;font-weight:bold;"
+        >
+          Reset Password
+        </a>
+
+        <p style="margin-top:20px">This link expires in <b>1 hour</b>.</p>
+
+        <p>If you didn't request this, simply ignore this email.</p>
+
+        <hr/>
+
+        <small>QuickHire Team</small>
+      </div>
+    `;
+
+    await sendEmail(user.email, "Reset your QuickHire password", html);
+
+    return successResponse(
+      res,
+      200,
+      "Password reset link sent successfully"
+    );
+
+  } catch (err) {
+    console.log(err);
+
+    return errorResponse(
+      res,
+      500,
+      "Unable to send reset email"
+    );
+  }
+}
+
+async function resetPassword(req, res) {
+  try {
+
+    const { token } = req.params;
+
+    const { password } = req.body;
+
+    if (!password) {
+      return errorResponse(res, 400, "Password is required");
+    }
+
+    if (password.length < 6) {
+      return errorResponse(
+        res,
+        400,
+        "Password must be at least 6 characters"
+      );
+    }
+
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: {
+        $gt: Date.now(),
+      },
+    });
+
+    if (!user) {
+      return errorResponse(
+        res,
+        400,
+        "Reset link is invalid or expired"
+      );
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+
+    await user.save();
+
+    return successResponse(
+      res,
+      200,
+      "Password reset successfully"
+    );
+
+  } catch (err) {
+
+    console.log(err);
+
+    return errorResponse(
+      res,
+      500,
+      "Unable to reset password"
+    );
+  }
+}
 
 module.exports = {
   registerUser,
   login,
   updateProfile,
-  downloadResume
+  downloadResume,
+  forgotPassword,
+  resetPassword,
 };

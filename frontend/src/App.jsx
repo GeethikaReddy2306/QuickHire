@@ -8,6 +8,8 @@ import BrowsePage from "./Pages/BrowsePage";
 import Signup from "./Pages/Signup";
 import LoginPage from "./Pages/LoginPage";
 import ProfilePage from "./Pages/ProfilePage";
+import ForgotPassword from "./Pages/ForgotPassword";
+import ResetPassword from "./Pages/ResetPassword";
 import JobDetailsPage from "./Pages/JobDetailsPage";
 import AppliedJobsPage from "./Pages/AppliedJobsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -41,6 +43,8 @@ export default function App() {
         <Route path="/browse" element={<BrowsePage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/access-denied" element={<AccessDeniedPage />} />
 
         {/* Student Routes */}

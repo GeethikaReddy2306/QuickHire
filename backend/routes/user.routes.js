@@ -5,12 +5,15 @@ const {
   registerUser,
   login,
   updateProfile,
-  downloadResume
+  downloadResume,
+  forgotPassword,
+  resetPassword,
 } = require("../controllers/user.controller");
-
 const isAuthenticated = require("../middleware/auth");
 const upload = require("../middleware/multer");
+router.post("/forgot-password", forgotPassword);
 
+router.post("/reset-password/:token", resetPassword);
 router.post("/register", registerUser);
 router.post("/login", login);
 router.get("/test", (req, res) => {

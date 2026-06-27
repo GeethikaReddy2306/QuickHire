@@ -4,66 +4,80 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
     },
 
     email: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
 
     phoneNumber: {
       type: Number,
       required: true,
-      unique: true
+      unique: true,
     },
 
     password: {
       type: String,
-      required: true
+      required: true,
     },
 
     role: {
       type: String,
       enum: ["student", "recruiter"],
-      required: true
+      required: true,
     },
 
     profile: {
       bio: {
         type: String,
-        default: ""
+        default: "",
       },
 
       skills: [
         {
-          type: String
-        }
+          type: String,
+        },
       ],
 
       resume: {
         type: String,
-        default: ""
+        default: "",
       },
 
       resumeOriginalName: {
         type: String,
-        default: ""
+        default: "",
       },
 
       company: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Company"
+        ref: "Company",
       },
 
       photo: {
         type: String,
-        default: ""
-      }
-    }
+        default: "",
+      },
+    },
+
+    resetPasswordToken: {
+      type: String,
+      default: null,
+      select: false,
+    },
+
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+      select: false,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 const User = mongoose.model("User", userSchema);
